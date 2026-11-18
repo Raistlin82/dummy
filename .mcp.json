@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "btp-administration": {
+      "type": "http",
+      "url": "https://sso.mcp.btp.cloud.sap/mcp",
+      "oauth": {
+        "clientId": "e789ba01-5612-47ee-bfe7-79e26411c1ca"
+      }
+    },
+    "calm": {
+      "command": "node",
+      "args": ["${HOME}/.nova/calmcp/dist/index.js"],
+      "env": {
+        "CALM_TENANT": "${CALM_TENANT:-}",
+        "CALM_REGION": "${CALM_REGION:-}",
+        "CALM_CLIENT_ID": "${CALM_CLIENT_ID:-}",
+        "CALM_CLIENT_SECRET": "${CALM_CLIENT_SECRET:-}",
+        "CALM_WRITE_ENABLED": "false"
+      }
+    },
+    "drawio": {
+      "command": "npx",
+      "args": ["-y", "@drawio/mcp@1.12.0"],
+      "env": {
+        "DRAWIO_BASE_URL": "${DRAWIO_BASE_URL:-https://app.diagrams.net/}"
+      }
+    },
+    "exa": {
+      "type": "http",
+      "url": "https://mcp.exa.ai/mcp"
+    },
+    "fiori-mcp": {
+      "command": "npx",
+      "args": ["--yes", "@sap-ux/fiori-mcp-server@1.17.0", "fiori-mcp"],
+      "env": {
+        "SAP_UX_FIORI_TOOLS_DISABLE_TELEMETRY": "true"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.85"]
+    },
+    "sap-docs": {
+      "type": "http",
+      "url": "https://mcp-sap-docs.marianzeis.de/mcp"
+    },
+    "ui5-mcp-server": {
+      "command": "npx",
+      "args": ["-y", "@ui5/mcp-server@0.3.3"]
+    }
+  }
+}

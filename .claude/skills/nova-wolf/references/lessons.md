@@ -1,0 +1,605 @@
+# Lezioni dagli sviluppi NOVA
+
+Errori già pagati in uno sviluppo, scritti perché il prossimo non li ripaghi. Ogni voce dice:
+
+- la **regola**, come istruzione;
+- il **perché**: il guasto che è successo davvero;
+- **come si verifica**: il controllo che lo intercetta;
+- i **passi** del playbook a cui si applica;
+- la **fonte**: progetto e data.
+
+**Come si usa.** Prima di eseguire un passo, `node <skill>/scripts/nova-config.mjs lessons <PASSO> --project .` stampa le voci che valgono per quel passo; `lessons --general` quelle per tutti i passi, da leggere una volta a sessione. Il comando legge la riga dei passi: gli id tra backtick (`CF_DEPLOY_DEV`, o `CF_*` per una famiglia), oppure *tutti*, *tutti i controlli bloccanti*, *ogni sfida*. Una lezione nuova si aggiunge nella stessa forma, nella sezione del suo tema, con la pull request sul toolkit. Una voce che smette di valere (cambia SAP, cambia il toolkit) non si cancella in silenzio: si corregge e si scrive perché.
+
+Le lezioni stanno qui e non nel `CLAUDE.md` di un progetto: lì le legge solo chi lavora a quel progetto.
+
+---
+
+## BTP e deploy
+
+- **Prima di promettere un deploy, verifica che OGNI componente supporti la sede scelta per quell'ambiente.**
+  - *Perché:* lo sviluppo amministrazione era pronto per PostgreSQL, ma il gateway da cui dipendeva sapeva usare solo HANA, e in eu10 HANA gratuito non c'è. L'hai scoperto solo al momento del deploy: tutto si è fermato, e il supporto PostgreSQL nel gateway è diventato uno sviluppo da fare a deploy già avviato.
+  - *Verifica:* per ogni servizio di persistenza del profilo, cerca nel codice di ogni componente distribuito la sua implementazione (`grep` del driver, della configurazione).
+  - *Passi:* `BTP_ENVIRONMENT`, `DEPLOY_PREREQS`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Quote ed entitlement si controllano PRIMA di creare i servizi, non dopo un errore.**
+  - *Perché:* il primo `create-service postgresql-db free` è fallito con «Internal Server Error». La quota del subaccount (2 istanze, una già usata dal configuratore) l'hai letta solo dopo. Non era la causa, ma l'hai saputo in ritardo, e il passo prerequisiti era stato saltato.
+  - *Verifica:* `btp-administration` › `SubaccountServiceQuota-list` per ogni servizio e piano dell'MTA, e `cf marketplace -e <servizio>` nello space di destinazione.
+  - *Passi:* `DEPLOY_PREREQS`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **`postgresql-db` free può fallire con un «Internal Server Error» transitorio del broker.**
+  - *Perché:* il primo tentativo è fallito, il secondo (istanza cancellata e ricreata, senza parametri) è riuscito in 10 minuti.
+  - *Verifica:* controllata la quota, `cf delete-service` dell'istanza fallita e un nuovo `create-service`; un secondo fallimento si porta all'utente col messaggio del broker.
+  - *Passi:* `CF_POSTGRES`, `CF_DEPLOY_DEV`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Prima di ogni comando `cf` che scrive, controlla utente, org e space di `cf target`.**
+  - *Perché:* la sessione `cf` era di un'altra persona e puntava allo space del configuratore NOVA, non a quello dello sviluppo. Un `cf push` lì avrebbe scritto nell'applicazione sbagliata, a nome di qualcun altro.
+  - *Verifica:* `cf target`; se l'utente non è chi lavora, glielo chiedi a scelta (login col proprio utente oppure uso della sessione).
+  - *Passi:* tutti i passi `CF_*`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **In `.cfignore` ancora i percorsi alla radice (`/amministrazione/`).**
+  - *Perché:* `amministrazione/` senza barra iniziale vale a ogni livello, come in `.gitignore`: ha escluso anche `dist/amministrazione/`, e il gateway non partiva («Cannot find module»).
+  - *Verifica:* dopo il primo push, `cf logs <app> --recent` sui moduli mancanti; prima, controlla che ogni riga di `.cfignore` cominci con `/` o `*`.
+  - *Passi:* `CF_DEPLOY_DEV`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **PostgreSQL on SAP BTP: `CREATE SCHEMA … AUTHORIZATION <ruolo>` fallisce.** Lo schema lo crea il proprietario, e al ruolo dai `GRANT USAGE, CREATE ON SCHEMA`.
+  - *Perché:* l'amministratore dell'istanza non ottiene il SET sul ruolo che crea («42501 must be able to SET ROLE»), nemmeno dopo `GRANT … WITH SET TRUE`. Il ruolo resta comunque proprietario degli oggetti che crea.
+  - *Verifica:* lo script del ruolo si prova contro l'istanza vera prima di dichiarare la procedura.
+  - *Passi:* `CF_POSTGRES`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Le credenziali del database si usano dentro il container, non sulla postazione.**
+  - *Perché:* per creare il ruolo del CAP servono le credenziali del proprietario. Con `cf ssh` nel container che ha già il binding, la password del ruolo passata via stdin e il file del servizio user-provided creato con permessi 600 e cancellato subito, nessun segreto passa dalla chat, dai log o dal disco.
+  - *Verifica:* nessun `cf create-service-key` sul proprietario; nessun segreto nell'output dei comandi; dopo, `cf disable-ssh`.
+  - *Passi:* `CF_POSTGRES`, `CF_DEPLOY_DEV`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Un endpoint pubblico che non deve ancora ricevere traffico si tiene CHIUSO, non aperto con un'eccezione.**
+  - *Perché:* senza il certificato vero di S/4 la tentazione è spegnere la firma in sviluppo, e lasciare così un endpoint su Internet senza autenticazione applicativa. Con la firma attiva su un certificato di cui si è cancellata la chiave privata, nessuno può firmare e il gateway resta in modo produzione.
+  - *Verifica:* una richiesta non firmata deve dare 401.
+  - *Passi:* `CF_DEPLOY_DEV`, `CF_DEPLOY_CHECK`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Driver `pg`: un `Pool` vuole sempre un gestore `error`.**
+  - *Perché:* quando il server chiude una connessione inattiva (accade su un PostgreSQL gestito, e alla chiusura di un database) il pool emette `error`, e senza gestore il processo cade. Misurato con una prova che ne aveva uno solo su due.
+  - *Verifica:* `grep` di `new Pool(` e di `.on('error'` nello stesso modulo.
+  - *Passi:* `CAP_LOGIC`, `CODE_REVIEW`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **«Gratuito» si verifica su SAP Discovery Center, non a memoria.**
+  - *Perché:* SAP Cloud Logging ha solo piani a pagamento (dev, standard e large, in Capacity Units), e nello space non compariva nemmeno. L'unico servizio di log gratuito è `application-logs lite`, che è deprecato.
+  - *Verifica:* `sap_discovery_center_service` (modello di licenza e piani) e `cf marketplace -e <servizio>`.
+  - *Passi:* `BTP_ENVIRONMENT`, `OBSERVABILITY`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+
+## Verifica e chiusura dei passi
+
+- **La validazione automatica non sostituisce il controllo a occhio.**
+  - *Perché:* `DIAGRAM_CHECK` era stato chiuso con «3/3 OK, 0 warning» e con l'export PNG riuscito. Aperte, le immagini avevano linee sopra le etichette, linee che attraversavano riquadri estranei e un ramo PostgreSQL superato da una decisione successiva.
+  - *Verifica:* apri ogni immagine prodotta e confrontala con la lista della skill (sovrapposizioni, etichette, contenuto contro le ADR correnti) prima di chiudere.
+  - *Passi:* `DIAGRAM_CHECK`, ogni passo che produce un'immagine o un documento.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Un diagramma rappresenta l'architettura approvata, non l'ambiente di sviluppo.**
+  - *Perché:* hai tolto Cloud Logging da un diagramma «test o produzione» perché in sviluppo non c'è. Il documento di architettura approvato invece lo prevede, con i suoi costi.
+  - *Verifica:* ogni componente aggiunto o tolto da un diagramma si confronta con le decisioni del documento di architettura e delle ADR.
+  - *Passi:* `SOLUTION_DESIGN`, `DIAGRAM_CHECK`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Un sospetto letto con `curl` si misura nel browser vero prima di correggerlo.**
+  - *Perché:* le intestazioni facevano pensare che la CSP bloccasse lo script di login dell'approuter. In Chromium il login partiva, senza violazioni. Una «correzione» avrebbe allargato la CSP per niente.
+  - *Verifica:* Playwright sulla pagina vera, raccogliendo la console.
+  - *Passi:* `CF_DEPLOY_CHECK`, `SECURITY_REVIEW`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Una prova di sensibilità che si lancia solo a mano non protegge niente.** La verifica locale e la CI devono far girare anche la variante col difetto e pretendere il rosso, col testo atteso.
+  - *Perché:* tre prove col browser avevano una variante col difetto (`NOVA_PROVA_DIFETTO=…`) che nessuno lanciava. Un rilevatore diventato cieco sarebbe rimasto verde. L'ha trovato la revisione del codice.
+  - *Verifica:* ogni `NOVA_PROVA_DIFETTO` dello script compare anche nello script di verifica, con uscita attesa 1 e il testo atteso.
+  - *Passi:* `CODE_REVIEW`, `REGRESSION_TESTS`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-03.
+- **Chiudi un passo dicendo nell'evidenza cosa NON è stato verificato.**
+  - *Perché:* `CF_DEPLOY_CHECK` si è chiuso senza il login di un utente. Scriverlo nell'evidenza è ciò che lo fa riaprire; un'evidenza che lo tace lo fa credere fatto.
+  - *Verifica:* ogni voce del «Check» del passo ha nell'evidenza una misura oppure un «NON VERIFICATO» col motivo.
+  - *Passi:* tutti i controlli bloccanti.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **Il conteggio dell'avanzamento è quello dell'installer, mai uno tenuto a mente.**
+  - *Perché:* hai riferito «54 su 75» e l'installer diceva «52 su 74, 4 deviazioni».
+  - *Verifica:* `install.mjs status`, letto al momento di riferirlo.
+  - *Passi:* tutti.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **`npm audit`: separa runtime e sviluppo, e un avviso senza correzione si DICHIARA, non si azzera.**
+  - *Perché:* le «alte» del gateway erano tutte nella catena di jest (solo sviluppo). Quelle dell'amministrazione erano un solo avviso (`braces`) senza versione corretta, e la «correzione» di npm era una regressione di major. Il gate chiede zero alte: si chiude solo come deviazione accettata dall'utente e scritta nel registro.
+  - *Verifica:* `npm audit --omit=dev --json` per lockfile; per ogni alta, la catena `via` e il campo `fixAvailable`.
+  - *Passi:* `SUPPLY_CHAIN`, `CF_BUILD`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+
+## Correzioni automatiche al codice
+
+- **Un correttore automatico di testo non lavora con regex sul sorgente.** Prima estrae i pezzi visibili con un tokenizzatore per formato, poi corregge solo quelli.
+  - *Perché:* tre stesure di un correttore di accenti hanno sbagliato in modi opposti: svuotato i commenti di otto `index.html`, trasformato `'unsafe-inline'` della CSP in `'unsafe-inlinè'`, restando ciechi su «c'e'».
+  - *Verifica:*
+    - il file corretto ha lo stesso numero di righe (altrimenti si interrompe);
+    - prima del commit si elencano tutte le parole sostituite (`git diff --word-diff`);
+    - ogni errore trovato diventa un caso del gate.
+  - *Passi:* `I18N_COMPLETENESS`, ogni correzione di massa.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-03.
+- **Dopo un cambio di testi aggiorni SOLO i test che falliscono.**
+  - *Perché:* correggere tutte le regex dei test ne ha rotte 66. Molti test portano i loro rilevatori (messaggi per lo sviluppatore), e altri provano un componente che non era cambiato (i messaggi del gateway).
+  - *Verifica:* la lista dei pattern attesi falliti dopo il cambio, e niente di più.
+  - *Passi:* `I18N_COMPLETENESS`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-03.
+- **Una regex in una prova che cerca il testo di UN ALTRO componente non si aggiorna col tuo.**
+  - *Perché:* hai accentato la regex che cercava una frase del gateway, che in quel passo non cambiava: la prova col browser è diventata rossa.
+  - *Verifica:* prima di cambiare un'attesa, trova da quale sorgente viene il testo (`grep` nel repository).
+  - *Passi:* `I18N_COMPLETENESS`, `REGRESSION_TESTS`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-03.
+- **Di un'uscita non zero leggi sempre il motivo.**
+  - *Perché:* in zsh `set -- $v` non spezza la stringa: lo script lanciato non esisteva, e il suo «uscita 1» sembrava il rosso atteso di una prova di sensibilità.
+  - *Verifica:* oltre al codice, il testo atteso nell'output; in zsh, gli array.
+  - *Passi:* tutti.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-03.
+- **Un test sul filesystem scrive l'mtime esplicito.**
+  - *Perché:* un file scritto «adesso» ha a volte un mtime successivo a `Date.now()` (risoluzione sotto il millisecondo), e il codice prende giustamente il ramo «nel futuro». Il test cadeva di rado, sempre dopo prove pesanti: due volte su quindici giri.
+  - *Verifica:* `fs.utimesSync` con una data qualche secondo nel passato, più un test esplicito del ramo «nel futuro».
+  - *Passi:* `REGRESSION_TESTS`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-04.
+- **i18n di UI5: l'apostrofo si raddoppia (`''`) solo nei testi che hanno segnaposto.**
+  - *Perché:* solo quelli passano da `formatMessage`. In un testo senza segnaposto `''` resta doppio sullo schermo.
+  - *Verifica:* `getText` senza argomenti mostra il testo così com'è; nei bundle, `''` solo dove c'è `{0}`.
+  - *Passi:* `I18N_COMPLETENESS`, `FE_ANNOTATIONS`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-03.
+
+## Gate e test
+
+- **Ogni rilevatore ha una prova di sensibilità che COSTRUISCE il difetto nel test e pinna il testo del riscontro.**
+  - *Perché:* un test che non diventa rosso quando il guard sparisce non prova nulla; e un rilevatore che segnala una violazione qualsiasi passerebbe pur essendo cieco su quella cercata.
+  - *Verifica:* neutralizza i guard uno per uno e guarda quali test diventano rossi.
+  - *Passi:* `CODE_REVIEW`, `REGRESSION_TESTS`, ogni passo che scrive un gate.
+  - *Fonte:* nova-archivelink-gateway (CLAUDE.md), provaDiSensibilita; nova-invoice-suite (CLAUDE.md), trappola n.4.
+- **Nessun elenco scritto a mano: derivalo dalla fonte, oppure coprilo con un gate che confronta nei due versi.**
+  - *Perché:* sette liste divergenti hanno cancellato 40 CodeList dall'immagine, aperto una fuga di dati fra società e lasciato CronJob mai applicati.
+  - *Verifica:* un gate rifà il confronto con la fonte e fallisce sul delta in entrambi i versi.
+  - *Passi:* `CAP_MODEL`, `CAP_LOGIC`, `CODE_REVIEW`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), «Una lista di nomi scritta a mano diverge»; nova-archivelink-gateway (CLAUDE.md), gate del dispatch.
+- **Metti un minimo sul MISURATORE, e distingui «ho guardato e non c'è niente» da «non riesco a guardare».**
+  - *Perché:* con zero input un gate è verde per caso; e un minimo legato a una proprietà del prodotto diventa rosso proprio quando il lavoro finisce.
+  - *Verifica:* un input vuoto deve dare un avviso, un parser rotto deve dare rosso.
+  - *Passi:* `CODE_REVIEW`, `REGRESSION_TESTS`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), D5/D10, findingStateFreshness.
+- **Il presidio esercita il MECCANISMO a runtime, non l'elenco o la dichiarazione.**
+  - *Perché:* il gestore dell'audit dei campi era spento mentre il gate sulla lista restava verde; `@restrict where` e un gate di fase erano dichiarati e non applicati.
+  - *Verifica:* per ogni controllo dici dove si applica a runtime e asserisci l'effetto (riga scritta, richiesta rifiutata).
+  - *Passi:* `CAP_LOGIC`, `UNIT_TESTS_CAP`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), Round 12, trappola n.3.
+- **Un gate si misura dove gira davvero, e i parametri d'esecuzione (per esempio il tetto di heap) stanno negli script npm.**
+  - *Perché:* `mktemp` in sintassi BSD e un file generato messo in `.gitignore` lo rompevano solo su Linux; la CI andava in esaurimento di memoria senza il `NODE_OPTIONS` usato a mano.
+  - *Verifica:* lo stesso script npm dà lo stesso esito in CI e in locale.
+  - *Passi:* `CI_PIPELINE`, `REGRESSION_TESTS`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), «Un gate va misurato dove gira davvero».
+- **Una verifica si giudica dal numero di test saltati confrontato con l'atteso, non dal verde; il riepilogo si legge dal log, non dal codice d'uscita del wrapper.**
+  - *Perché:* un `.skip` su una prova d'integrazione lascia la suite verde e toglie l'unica prova contro la controparte; due wrapper hanno riportato codici d'uscita opposti sulla stessa corsa.
+  - *Verifica:* uno script conta i saltati (rosso su «11 skip, attesi 10») e legge la riga `Test Suites:`.
+  - *Passi:* `REGRESSION_TESTS`, `UNIT_TESTS_CAP`.
+  - *Fonte:* nova-archivelink-gateway (CLAUDE.md), verifica-locale.sh; nova-invoice-suite (CLAUDE.md), TL;DR Test.
+- **Gli helper di test riportano stato e corpo di una risposta d'errore, prima di asserire un campo.**
+  - *Perché:* un helper che sui non-ok restituiva `{}` ha nascosto per mesi un HTTP 500 dietro «Received: undefined».
+  - *Verifica:* un'asserzione rossa stampa stato e corpo della risposta.
+  - *Passi:* `UNIT_TESTS_CAP`, `E2E_A11Y`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), R8-05.
+- **Asserisci la PROPRIETÀ di un insieme derivato, non un conteggio o un elemento pinnato; chiuso un residuo, controlla che le sonde iniettino ancora qualcosa di vivo.**
+  - *Perché:* `toBe(74)` è invecchiato col prodotto; una sonda puntata su una deroga sparita è diventata un no-op silenzioso.
+  - *Verifica:* un controllo sul misuratore: la neutralizzazione deve aver tolto qualcosa.
+  - *Passi:* `CODE_REVIEW`, `REGRESSION_TESTS`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), D6, D5, D2/D10.
+
+- **Il banco delle prove col browser riproduce le intestazioni di sicurezza dell'esercizio: la CSP dell'approuter si applica a ogni pagina, non solo in produzione.**
+  - *Perché:* il launchpad locale e le nove app funzionavano sul banco (CAP serve le app senza CSP) e sette prove col browser erano verdi. Su BTP, dietro l'approuter con `script-src` senza `unsafe-eval`, OGNI tile diceva «Non è stato possibile aprire l'app»: l'ha trovato l'utente, dopo il deploy. Un banco più permissivo dell'esercizio prova il banco, non l'app.
+  - *Verifica:* la funzione che apre il browser delle prove legge la CSP da `xs-app.json` (`responseHeaders`) e la mette su ogni risposta HTML; se il file non la dichiara, la prova si ferma. Prova di sensibilità: col difetto ricostruito la prova dell'app d'ingresso dev'essere ROSSA e nominare l'errore della shell.
+  - *Passi:* `FE_RUN_CHECK`, `UI_TESTS`, `E2E_A11Y`, `LAUNCHPAD_CHANGE`, `APPROUTER_BTP`, `CF_DEPLOY_CHECK`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-15.
+- **Una prova con l'orologio iniettato dà lo STESSO orologio a tutti i componenti che misurano il tempo, e non parte da una data fissa uguale al giorno in cui la si scrive.**
+  - *Perché:* una prova dell'acquisizione dava al giro un orologio lento che partiva dal `2026-10-15T08:00Z` e lasciava al riconoscimento del gateway quello vero. Passava solo se la suite girava verso le 08:00 di quel giorno; alle 16 la riga in volo era «scaduta» e la suite rossa, su codice giusto.
+  - *Verifica:* ogni orologio iniettato in un test si cerca nei costruttori di TUTTI i componenti coinvolti; la prova si rilancia a un'ora diversa (o con l'orologio di sistema spostato) prima di chiuderla.
+  - *Passi:* `UNIT_TESTS_CAP`, `REGRESSION_TESTS`, `CAP_LOGIC`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-15.
+
+## Protocollo e controparti
+
+- **Un comportamento di protocollo si prova con un artefatto della CONTROPARTE, mai con un client scritto in casa.**
+  - *Perché:* server e client dello stesso autore si confermavano a vicenda: 404 su ogni chiamata reale, con sette suite verdi.
+  - *Verifica:* i casi partono dall'URL pubblicato dal produttore, da una cattura di traffico o dal sistema vero; il doppio di test è un server HTTP vero.
+  - *Passi:* `CAP_LOGIC`, `UNIT_TESTS_CAP`, `REGRESSION_TESTS`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), R13; nova-archivelink-gateway (CLAUDE.md), regole ereditate.
+- **Quando la fonte autoritativa è irraggiungibile, si REGISTRA il difetto dove il prossimo guarderà, invece di correggerlo a intuito; e l'irraggiungibilità si rimisura.**
+  - *Perché:* una correzione fatta su riassunti di terzi avrebbe sepolto il difetto; e «help.sap.com bloccato» era falso, e ha impedito per settimane una verifica che costava un `curl`.
+  - *Verifica:* ogni «strumento non disponibile» nomina la decisione sospesa e cosa serve per prenderla.
+  - *Passi:* `SCENARIO_RESEARCH`, `SOURCES_CHECK`, `SOLUTION_DESIGN`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), R13-04; nova-archivelink-gateway (CLAUDE.md), ADR 0003.
+- **Uno stub fallisce nominando la domanda aperta (501 col suo nome), mai con `null` o 404.**
+  - *Perché:* un `null` a valle è indistinguibile da «non c'è»; un 404 manda a cercare un errore di configurazione dell'URL.
+  - *Verifica:* chiamare la funzione non realizzata e leggere il messaggio.
+  - *Passi:* `CAP_LOGIC`.
+  - *Fonte:* nova-archivelink-gateway (CLAUDE.md), AdapterNonRealizzato; nova-invoice-suite (CLAUDE.md), R13.
+- **Davanti a un'annotazione che non produce niente, o a un difetto attribuito al fornitore, leggi il sorgente del framework che la consuma.**
+  - *Perché:* tre stesure delle KPI scritte indovinando; 66 riscontri di accessibilità sembravano un blocco del rilascio finché il sorgente non ha dato la prova.
+  - *Verifica:* la spiegazione cita la funzione del framework (`KPI.js`, `GenericTileRenderer`, `Table-dbg.js`).
+  - *Passi:* `FE_ANNOTATIONS`, `FE_RUN_CHECK`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), ANA-A1, R20-01, R8-05a.
+
+## CAP
+
+- **Il `where` di `@restrict` non protegge CREATE e NEW: serve un `before(['CREATE','NEW'])` che deriva insieme e colonna dai grant.**
+  - *Perché:* il runtime valuta solo i ruoli: una riga poteva nascere globale o di un'altra società, e senza CREATE il draftActivate aggirava il guard.
+  - *Verifica:* un POST su un'altra società, più la controprova 403 su draftEdit e DELETE.
+  - *Passi:* `CAP_LOGIC`, `SECURITY_MATRIX`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), companyScopeCreateGuard (M-3).
+- **Nei profili con utenti di prova si usa `kind: 'mocked'` o `basic`, mai `dummy`.**
+  - *Perché:* `dummy` rende ogni richiesta privilegiata: la suite di autorizzazione confermava solo gli accessi, e 27 asserzioni di diniego erano false.
+  - *Verifica:* un gate rifiuta `dummy` su ogni profilo; i test HTTP portano un'identità.
+  - *Passi:* `CAP_LOGIC`, `UNIT_TESTS_CAP`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), Round 8 «kind dummy».
+- **La disponibilità di un servizio si ricava dalla configurazione risolta (`cds.env`), mai dall'esito di `cds.connect.to`.**
+  - *Perché:* `connect.to('enterprise-messaging')` disattivato non lancia, e le sottoscrizioni finivano su un servizio senza broker senza una riga di log.
+  - *Verifica:* un caso di controllo: un nome inventato deve lanciare.
+  - *Passi:* `CAP_LOGIC`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), M-01 Event Mesh.
+- **Lo stato di errore si persiste in `req.on('failed')` o dopo il commit; con la coda persistente, un osservatore `/#failed` per ogni evento, con l'elenco derivato.**
+  - *Perché:* `req.reject` annullava lo stato di errore; la coda restituisce `undefined`, falsa le metriche e abbandona i messaggi dopo maxAttempts senza traccia.
+  - *Verifica:* il fallimento resta in tabella dopo il rollback; il task `/#failed` esiste.
+  - *Passi:* `CAP_LOGIC`, `OBSERVABILITY`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), «Failure-state», D2, D10.
+- **Un `@assert.range enum` si lega alla sua tabella di master data con un gate nei due versi; un parametro che diventa obbligatorio vuole anche il guard nell'handler.**
+  - *Perché:* dei codici venivano offerti dall'aiuto ai valori e rifiutati con 400; `@mandatory` governa solo il dialogo di Fiori elements.
+  - *Verifica:* test che confrontano enum e catalogo e che scandiscono le deleghe `srv.send`.
+  - *Passi:* `CAP_MODEL`, `CAP_LOGIC`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), D6, D12.
+- **Da CAP 10 una scrittura restituisce un array con `affected`, non la riga: un `after('CREATE'|'UPDATE'|'SAVE')` che legge colonne dal risultato resta inerte, senza errori.**
+  - *Perché:* è il nuovo default della major (note di rilascio di giugno 2026: «an array with an `.affected` property», con `legacy_srv_results` come uscita); nella revisione alcuni handler hanno smesso di lavorare dopo l'aggiornamento, e nessun test era rosso.
+  - *Verifica:* `grep` di ogni `after('CREATE'`, `after('UPDATE'`, `after('UPSERT'` e `after('SAVE'`, e di come usa il risultato; per ciascuno un test che diventa rosso sul comportamento vecchio.
+  - *Passi:* `FRAMEWORK_UPGRADE`, `CAP_LOGIC`, `CODE_REVIEW`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Da CAP 10 un'azione bound di un'entità con ETag vuole `If-Match`, anche sull'entità attiva: 428 senza, 412 con un ETag vecchio.**
+  - *Perché:* client tecnici e scenari Joule che chiamavano le azioni senza `If-Match` hanno smesso di funzionare dopo l'aggiornamento (misurato su CAP 10).
+  - *Verifica:* per ogni azione bound di un'entità con `@odata.etag`, un test HTTP senza `If-Match` (428 atteso) e uno con l'ETag letto; i consumatori aggiornati e documentati.
+  - *Passi:* `FRAMEWORK_UPGRADE`, `CAP_LOGIC`, `API_CONSUMER_SETUP`, `UNIT_TESTS_CAP`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Con `ieee754compatible` i Decimal arrivano come stringa, anche su SQLite: il codice e i test li convertono prima di confrontarli o sommarli.**
+  - *Perché:* misurato su CAP 10 nella revisione: non succede solo su PostgreSQL, quindi la suite su SQLite non lo nasconde, ma un confronto fra stringhe sbaglia senza errori.
+  - *Verifica:* un test che legge un Decimal dal servizio e ne controlla tipo e valore; nel codice la conversione esplicita prima dei calcoli.
+  - *Passi:* `CAP_LOGIC`, `UNIT_TESTS_CAP`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **I messaggi di `sap-messages` (notify, warn, info) non vengono tradotti: serve una correzione dichiarata, con un test che diventa rosso quando SAP la correggerà.**
+  - *Perché:* misurato su CAP 10: `sap_messages4` salta `localized`, e l'utente vedeva i messaggi non tradotti.
+  - *Verifica:* un test che chiede la risposta in un'altra lingua (`Accept-Language`) e controlla il testo dell'header `sap-messages`; la correzione è scritta in `docs/technical.md`.
+  - *Passi:* `FRAMEWORK_UPGRADE`, `CAP_LOGIC`, `I18N_COMPLETENESS`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **I default nuovi di una major si decidono, non si ereditano: con CAP 10 le richieste senza `IsActiveEntity` vanno all'entità attiva anche con il draft, e il `maxAttempts` della coda persistente passa da 20 a 10.**
+  - *Perché:* tutti e due cambiano il comportamento senza un errore: richieste che arrivano all'entità sbagliata, messaggi della coda abbandonati dopo metà dei tentativi.
+  - *Verifica:* la decisione è in `docs/technical.md` e nella configurazione (`cds.fiori`, `cds.requires.queue`), fissata da un test.
+  - *Passi:* `FRAMEWORK_UPGRADE`, `CAP_LOGIC`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Sul modello dati due sfidanti indipendenti valgono più di una: la revisione di una sfidante esclusa dal piano si registra lo stesso, come extra.**
+  - *Perché:* nella revisione due sfidanti hanno trovato lo stesso CRITICAL ciascuna per conto suo, e una delle due era stata esclusa dal piano.
+  - *Verifica:* `install.mjs challenge <PASSO> --skill <sfidante> --report <file>`: la revisione di una sfidante esclusa si registra come extra, e non conta per la sfida.
+  - *Passi:* `CAP_MODEL`, ogni sfida.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+
+- **`SELECT.one` su un'entità con un gestore `on('READ')` scritto a mano rende l'ARRAY che il gestore restituisce, non la riga.**
+  - *Perché:* un servizio che leggeva in processo lo stato di un altro (`SELECT.one.from(Stato).where({chiave:'unica'})`) riceveva `[ {…} ]`, e ogni campo era `undefined`: la schermata diceva «Non si sa» a chi aveva il ruolo. Un test che controllava solo «non negato» lo lasciava passare.
+  - *Verifica:* il risultato si normalizza (`Array.isArray(x) ? x[0] : x`); il test controlla il VALORE letto, non l'assenza di un rifiuto.
+  - *Passi:* `CAP_LOGIC`, `UNIT_TESTS_CAP`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-15.
+
+## PostgreSQL
+
+- **I test su SQLite nascondono i difetti di PostgreSQL: deploy da zero e aggiornamento sul database vero, subito dopo il modello.**
+  - *Perché:* sul PostgreSQL reale sono emersi dodici difetti invisibili alla suite: il servizio che si spegneva all'avvio, ogni lettura OData in 500, `sum` su un testo, `GROUP BY` con l'ETag, transazioni annullate (25P02), seed troppo lunghi, migrazioni che rompevano l'aggiornamento.
+  - *Verifica:* il collaudo di `POSTGRES_UPGRADE_TEST`: deploy da zero, aggiornamento dalla versione di partenza, schema identico, suite anche su PostgreSQL.
+  - *Passi:* `CAP_MODEL`, `POSTGRES_SETUP`, `POSTGRES_UPGRADE_TEST`, `UNIT_TESTS_CAP`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Mai togliere un elemento persistito, né restringere una proiezione con il draft: l'aggiornamento di `cds-deploy` si ferma (`migration-unsupported-element-drop`).**
+  - *Perché:* togliere un campo, o restringere una proiezione `draft.enabled` (la tabella `.drafts` perde colonne), faceva fallire ogni aggiornamento del database.
+  - *Verifica:* un elemento che non serve si depreca e si toglie dall'API con `@cds.api.ignore`; la rimozione fisica è uno script di `cds deploy --script --delta-from`; una baseline degli elementi persistiti fa da gate.
+  - *Passi:* `CAP_MODEL`, `CAP_SCHEMA_EVOLUTION`, `POSTGRES_UPGRADE_TEST`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **I dati di `db/data` vanno in produzione e il deploy li riscrive ogni volta: niente dati demo, e nessuna tabella che il cliente modifica.**
+  - *Perché:* società, partite IVA, email e regole di approvazione demo finivano nei database dei clienti, e le personalizzazioni del cliente su `SystemParameters` venivano riscritte a ogni rilascio.
+  - *Verifica:* un gate sui CSV di `db/data` (nessuna email, nessuna partita IVA, nessun dato anagrafico); le tabelle con un grant di scrittura al cliente si inizializzano solo se mancano; un cambio di default su una riga esistente è una migrazione.
+  - *Passi:* `CAP_MODEL`, `POSTGRES_SETUP`, `CAP_SCHEMA_EVOLUTION`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Su PostgreSQL un errore annulla la transazione: ogni query successiva risponde 25P02, e un `try/catch` che «ignora» un errore di query avvelena il resto della richiesta.**
+  - *Perché:* nella revisione richieste intere fallivano dopo un errore tollerato, e le scritture di audit fatte dopo l'errore non arrivavano.
+  - *Verifica:* un errore tollerato sta in un savepoint o in una transazione sua (`cds.tx`); le scritture di audit dopo la chiusura; un test che provoca l'errore e controlla che la richiesta prosegua, su PostgreSQL.
+  - *Passi:* `CAP_LOGIC`, `POSTGRES_SETUP`, `POSTGRES_UPGRADE_TEST`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **`@cap-js/data-privacy` imposta la variabile di sessione HANA `ROLES` anche su PostgreSQL, e il servizio si ferma all'avvio.**
+  - *Perché:* il servizio non partiva sul PostgreSQL reale, con la suite su SQLite verde.
+  - *Verifica:* il servizio parte su PostgreSQL con tutti i plugin del `package.json`, prima del deploy.
+  - *Passi:* `POSTGRES_SETUP`, `PERSONAL_DATA`, `POSTGRES_UPGRADE_TEST`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Il servizio `db` non si connette prima che il modello sia caricato: su PostgreSQL ogni lettura OData risponde 500.**
+  - *Perché:* una connessione fatta al caricamento di un modulo, prima del modello, lasciava il servizio in piedi e ogni lettura in errore.
+  - *Verifica:* nessun `cds.connect.to('db')` a livello di modulo; dopo l'avvio ogni entity set risponde a una lettura senza 500.
+  - *Passi:* `CAP_LOGIC`, `POSTGRES_UPGRADE_TEST`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Gli identificatori non quotati diventano minuscoli: un alias `id` collide con l'elemento `ID`.**
+  - *Perché:* una query con l'alias `id` dava un errore solo su PostgreSQL.
+  - *Verifica:* alias diversi dai nomi degli elementi; le query scritte a mano provate su PostgreSQL.
+  - *Passi:* `CAP_LOGIC`, `POSTGRES_SETUP`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Su PostgreSQL i letterali numerici dentro una funzione diventano parametri di tipo testo: `sum(case when … then 1 else 0 end)` fallisce; si usa `count(case when … then 1 end)`.**
+  - *Perché:* un conteggio condizionale funzionava su SQLite e andava in errore su PostgreSQL.
+  - *Verifica:* ogni aggregazione con letterali provata su PostgreSQL (`POSTGRES_UPGRADE_TEST`).
+  - *Passi:* `CAP_LOGIC`, `POSTGRES_UPGRADE_TEST`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **CAP aggiunge la colonna ETag e un `ORDER BY` implicito anche alle letture `$apply` aggregate: su PostgreSQL l'errore è «must appear in GROUP BY».**
+  - *Perché:* le letture analitiche di un'app (ALP, KPI) rispondevano 500 solo sul database vero.
+  - *Verifica:* ogni lettura `$apply` delle app provata su PostgreSQL; l'entità aggregata senza ETag, o una vista dedicata.
+  - *Passi:* `CAP_LOGIC`, `FE_ANNOTATIONS`, `POSTGRES_UPGRADE_TEST`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **`cds-deploy` stampa la configurazione del database con la password del proprietario (`console.debug`), e il Job o il task del deploy la porta nei log.**
+  - *Perché:* la credenziale del proprietario del database è finita nei log del pod del deployer.
+  - *Verifica:* dopo il primo deploy leggi i log del deployer: chi li legge e per quanto restano (SAP Cloud Logging); se la password è uscita, ruota la credenziale con un nuovo binding.
+  - *Passi:* `KYMA_POSTGRES`, `CF_POSTGRES`, `KYMA_DEPLOY_CHECK`, `CF_DEPLOY_CHECK`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Classificare come «benign» l'errore `already exists` nasconde un `cds-deploy` annullato per intero: dopo il deploy si controlla `cds_model` rispetto al CSN.**
+  - *Perché:* un deploy annullato sembrava riuscito, perché il suo unico errore era stato filtrato come innocuo.
+  - *Verifica:* dopo ogni deploy il modello salvato in `cds_model` è il CSN della build (`gen/pg/db/csn.json`).
+  - *Passi:* `KYMA_POSTGRES`, `CF_POSTGRES`, `POSTGRES_UPGRADE_TEST`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+
+## Fiori elements e UI5
+
+- **Ogni etichetta è un TESTO, mai il nome di un elemento; i nomi tecnici vanno fra parentesi dopo il testo. `UI.SelectionFields` legge `@title`.**
+  - *Perché:* se non trova un'etichetta, Fiori elements ci mette il nome dell'elemento, in silenzio.
+  - *Verifica:* un gate sul modello compilato e uno sullo schermo vero, dentro le prove col browser.
+  - *Passi:* `FE_ANNOTATIONS`, `FE_RUN_CHECK`.
+  - *Fonte:* nova-archivelink-gateway (CLAUDE.md), regola delle etichette.
+- **Gli istanti si dichiarano `Timestamp` e si mostrano formattati, anche nella prosa che compongono i gestori.**
+  - *Perché:* `String` produce `Edm.String`, che nessuno formatta: a schermo arriva un ISO troncato.
+  - *Verifica:* un rilevatore sullo schermo (millisecondi facoltativi) e un test sulla prosa.
+  - *Passi:* `CAP_MODEL`, `FE_ANNOTATIONS`.
+  - *Fonte:* nova-archivelink-gateway (CLAUDE.md), regola degli istanti.
+- **L'accessibilità si misura sullo schermo renderizzato, e le regole non coperte si dichiarano a ogni esecuzione.**
+  - *Perché:* in Fiori elements la vista la genera il framework: una revisione del sorgente avrebbe detto «tutto a posto» su una pagina con zero landmark.
+  - *Verifica:* estrazione nel browser, giudizio puro testato in jest, guasto costruito nella pagina vera.
+  - *Passi:* `E2E_A11Y`, `APP_AUDIT`.
+  - *Fonte:* nova-archivelink-gateway (CLAUDE.md), regola dell'accessibilità.
+- **Il grant di un'azione e il suo flag di disponibilità sono un unico lavoro.**
+  - *Perché:* `@Core.OperationAvailable` con un path DISABILITA invece di nascondere: un bottone attivo che risponde 403. E una proprietà `@UI.Hidden` esce dal `$select`.
+  - *Verifica:* un gate deriva dal CSN i ruoli di lettura e d'azione, e i flag che consultano il ruolo.
+  - *Passi:* `FE_ANNOTATIONS`, `SECURITY_MATRIX`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), D2/M-01, NEW-02.
+- **Il validatore del manifest controlla lo schema, non la semantica di Fiori elements: i commenti vanno in chiavi dedicate FUORI dalle mappe iterate (`actions`, `targets`, `sections`, `subSections`, `columns`).**
+  - *Perché:* un `_comment` fra le azioni rendeva un bottone vuoto; `noDataText`, che in FE v4 non esiste, risultava valido; `controllerExtensions` nel target non veniva mai istanziato.
+  - *Verifica:* al render, non con `run_manifest_validation`.
+  - *Passi:* `FE_ANNOTATIONS`, `FE_RUN_CHECK`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), trappola n.2, D4/D14.
+- **Le interfacce si provano sul render, seguendo il percorso dell'utente; prima di dichiarare rotto il prodotto, escludi il misuratore.**
+  - *Perché:* un `ui5.yaml` invalido teneva giù anteprima e prove col browser mentre `npm test` restava verde; tre rossi su sei erano colpa del test.
+  - *Verifica:* Playwright arriva alla pagina cliccando; i residui si tengono con `test.fail()` dentro il corpo del test.
+  - *Passi:* `FE_RUN_CHECK`, `E2E_A11Y`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), Round UX 2026-09-02.
+- **Il canone terminologico vale per tutto ciò che raggiunge l'utente: bundle, CSV di esempio, `@title`, messaggi a runtime, guide.**
+  - *Perché:* coi bundle puliti restavano decine di stringhe fuori canone; `d''Acquisto` in CDS sfuggiva alla regex.
+  - *Verifica:* un gate sulle sorgenti, sui testi degli emettitori e sul CSN compilato, con l'escaping normalizzato prima di cercare.
+  - *Passi:* `I18N_COMPLETENESS`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), canone terminologico 2026-09-20.
+- **Lo schermo non promette ciò che il rendering non dà.**
+  - *Perché:* «non ci sono dati» con `initialLoad: Disabled`, «Salva» su un'azione disponibile solo sull'attiva, `phone: true` con una `GridTable`, filtri su campi calcolati: ognuna fallisce in silenzio.
+  - *Verifica:* gate derivati dai manifest e dal CSN.
+  - *Passi:* `FE_ANNOTATIONS`, `APP_AUDIT`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), initialLoad, R20-01, APP-A10.
+- **Una `SelectionVariant` con `Option #NE, Low: ''` non filtra, perché in CAP `!=` è null-safe: per «valorizzato» si usa `#GT ''`.**
+  - *Perché:* una vista che doveva nascondere le righe senza valore le mostrava tutte.
+  - *Verifica:* il conteggio della vista confrontato con una query sul servizio.
+  - *Passi:* `FE_ANNOTATIONS`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Una tabella analitica (ALP) raggruppa solo per le `GroupableProperties`, e un campo `#TextOnly` dichiara solo il testo.**
+  - *Perché:* senza attenzione la pagina dava decine di errori «drill-down».
+  - *Verifica:* ogni dimensione della tabella è fra le `GroupableProperties`; la console del browser senza errori di drill-down.
+  - *Passi:* `FE_ANNOTATIONS`, `FE_RUN_CHECK`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Un target senza `contextPattern` usa il pattern della rotta come percorso OData; con `routerClass: sap.f.routing.Router` senza FCL compare `getHelper is not a function`.**
+  - *Perché:* pagine che non si aprivano, con un errore del framework lontano dalla causa.
+  - *Verifica:* ogni target del manifest ha il suo `contextPattern`; il router è quello del layout scelto.
+  - *Passi:* `FE_ANNOTATIONS`, `FE_RUN_CHECK`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **`@Aggregation.CustomAggregate` senza `@Aggregation.default` risponde 500 a `aggregate(X)`.**
+  - *Perché:* una KPI dava errore a ogni lettura.
+  - *Verifica:* ogni aggregato custom ha il suo default; la lettura `aggregate(X)` provata sul servizio.
+  - *Passi:* `FE_ANNOTATIONS`, `CAP_MODEL`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+
+- **Un launchpad fuori da Work Zone (sito CDM statico, `Container.init('cdm')`) dichiara per ogni app le sue librerie come `asyncHints`; senza, la shell carica le sue di default e sotto una CSP senza `unsafe-eval` nessuna app si apre.**
+  - *Perché:* il sito derivava dal manifest titoli, inbound e tile, ma non `sap.ui5.dependencies`. La shell metteva `sap.ca.scfld.md`, `sap.ca.ui`, … e il caricamento si fermava su `sap/f/library.js` («Refused to evaluate a string as JavaScript»). La CSP era giusta e non si allarga: è il sito che va completato.
+  - *Verifica:* un gate confronta, per ogni applicazione del sito, `sap.platform.runtime.componentProperties.asyncHints.libs` con le librerie non `lazy` del suo manifest; nel browser, sotto la CSP vera, ogni tile apre la sua app.
+  - *Passi:* `LAUNCHPAD_CHANGE`, `APPROUTER_BTP`, `FE_RUN_CHECK`.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-15.
+
+## Sicurezza
+
+- **Un permesso è accettabile, un permesso silenzioso no: dove il sistema sceglie di consentire, lo scrive nel log di avvio o nel registro, col motivo.**
+  - *Perché:* un consenso muto lascia un residuo che nessuno vede.
+  - *Verifica:* ogni ramo permissivo emette una riga che ne nomina il motivo.
+  - *Passi:* `CAP_LOGIC`, `SECURITY_REVIEW`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), Round 9; nova-archivelink-gateway (CLAUDE.md), regole ereditate.
+- **La produzione si riconosce in modo fail-closed: un profilo sconosciuto vale produzione.**
+  - *Perché:* le allowlist di nomi erano fail-open per omissione, e CAP inietta `development` e `production` fra i profili risolti.
+  - *Verifica:* si sondano tutti i profili più un nome inventato, che deve ricadere in produzione.
+  - *Passi:* `CAP_LOGIC`, `SECURITY_REVIEW`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), SM-09, MAL-01.
+- **Se uno scope è filtrato per un attributo, il role template che lo concede deve portarlo.**
+  - *Perché:* senza attributo la condizione diventa `'1'='2'`: l'app si apre vuota, senza 403 e senza log.
+  - *Verifica:* un gate per coppia (template, definizione), che deriva le esenzioni.
+  - *Passi:* `SECURITY_MATRIX`, `CF_ROLES_DEV`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), X-01.
+- **Un guard si descrive per quello che è (controllo di coerenza o confine) e guarda il dato, non chi chiama.**
+  - *Perché:* un controllo descritto come confine chiude la domanda; uno di quelli era pura cerimonia davanti a un superamministratore.
+  - *Verifica:* la società attribuita dal registro si confronta con quella dichiarata, per tutti.
+  - *Passi:* `CAP_LOGIC`, `SECURITY_MATRIX`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), R9-33, R9-34.
+
+## Dipendenze
+
+- **Prima di accettare un major, interroga il registry per `peerDependencies` e `dependencies` e confronta i range.**
+  - *Perché:* `--legacy-peer-deps` disattiva il controllo e l'install esce 0; sei major su sette non dichiaravano peer; i gruppi Dependabot «non-breaking» trattano un minor 0.x come sicuro.
+  - *Verifica:* `npm install --dry-run` («add» invece di «change» vuol dire un doppio major).
+  - *Passi:* `SUPPLY_CHAIN`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), «--legacy-peer-deps non avvisa», triage Dependabot.
+- **Su una dipendenza mockata o caricata in modo pigro, un gate confronta la forma usata dal chiamante con quella esportata dal pacchetto installato.**
+  - *Perché:* due funzioni sono sparite in un aggiornamento senza far fallire il `require`, mentre il mock restava verde.
+  - *Verifica:* la forma si deriva dal sorgente del chiamante, senza cablarla.
+  - *Passi:* `SUPPLY_CHAIN`, `UNIT_TESTS_CAP`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), archiver #382, Resilience.
+
+## Documentazione
+
+- **Le cifre dei documenti le misura un gate, con un `--fix` che copia solo dalla misura al documento; mai tenute a mano accanto a cifre misurate.**
+  - *Perché:* una somma tenuta a mano sembrava fresca perché le vicine erano aggiornate.
+  - *Verifica:* il gate fallisce sul delta e su una regex non trovata.
+  - *Passi:* `TECH_DOCS`, `FUNCTIONAL_DOCS`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), «I conteggi di questo file», D6.
+- **Ogni stato non terminale ha la data dell'ultima misura, e gli aggregati si scompongono nei loro membri.**
+  - *Perché:* 16 dei 25 riscontri «ancora aperti» erano già corretti, e un registro così smette di essere letto.
+  - *Verifica:* un lint dà errore su uno stato senza data e avviso su uno vecchio.
+  - *Passi:* `APP_AUDIT`, `RELEASE_AUDIT`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), lint:findingstate.
+- **Un'affermazione si abbassa a ciò che è misurato; per alzarla si chiede al proprietario; e non si fondono una frase vera e una falsa.**
+  - *Perché:* un documento commerciale prometteva un Clean Core mai calcolato; una frase composta bloccava una correzione citando se stessa.
+  - *Verifica:* le affermazioni si separano, e un gate le lega al valore misurato.
+  - *Passi:* `FUNCTIONAL_DOCS`, `RELEASE_NOTES`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), battlecard 2026-09-13, D1-02.
+
+## BTP e deploy (dagli sviluppi precedenti)
+
+- **Ogni correzione a seed, migrazioni o manifest si verifica rieseguendo il percorso di deploy sul dialetto vero, non solo coi test su SQLite.**
+  - *Perché:* il filtro del deployer PostgreSQL cancellava 86 CSV, e le guard `IF EXISTS` cercavano le maiuscole sbagliate, con la suite verde.
+  - *Verifica:* la build del deployer, l'elenco dei file caricati davvero e il DDL generato.
+  - *Passi:* `CAP_BUILD`, `CF_POSTGRES`, `CAP_SCHEMA_EVOLUTION`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), «I gate girano su SQLite».
+- **Su Kyma il binding lo lega il nome della cartella di mount, che coincide con la chiave di `cds.requires`, più un file `type`.**
+  - *Perché:* rinominare il mount o togliere `type` fa sparire le credenziali senza alcun errore.
+  - *Verifica:* un `SERVICE_BINDING_ROOT` finto, e la lettura di `cds.env`.
+  - *Passi:* `KYMA_DEPLOY_DEV`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), binding dello scanner malware.
+- **Un binding reso opzionale porta un segnale (riga di log all'avvio e spia).**
+  - *Perché:* altrimenti si scambia un guasto rumoroso con uno muto; e un plugin che lancia al caricamento trasforma `optional: true` in un CrashLoopBackOff.
+  - *Verifica:* un gate nei due versi fra il registro e i manifest.
+  - *Passi:* `CF_DEPLOY_DEV`, `OBSERVABILITY`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), D1+D9, D4.
+- **Il deploy reale trova più difetti dell'audit della configurazione: il deploy di sviluppo è un controllo di correttezza, da fare presto e da ripetere a ogni wave di modifiche.**
+  - *Perché:* il deploy sul cluster Kyma vero ha trovato più difetti di tutto l'audit di configurazione: cookie, header, APIRule, PodSecurity, telemetria, zip della UI.
+  - *Verifica:* il primo deploy appena la build passa (`CAP_BUILD`); ogni wave di correzioni si chiude riaprendo il deploy e il suo controllo (`reopen`).
+  - *Passi:* `CAP_BUILD`, `AS_IS_BASELINE`, `KYMA_DEPLOY_CHECK`, `CF_DEPLOY_CHECK`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Una DestinationRule con affinità a cookie non usa `JSESSIONID`, che è il cookie di sessione dell'approuter.**
+  - *Perché:* con lo stesso nome il login falliva sempre, con «Session cookie does not match expected value for state».
+  - *Verifica:* nel chart il nome del cookie dell'affinità; il login nel browser dopo il deploy.
+  - *Passi:* `KYMA_BUILD`, `KYMA_DEPLOY_CHECK`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Un JWT XSUAA esterno passa dall'approuter solo nell'header `x-approuter-authorization`: un `Authorization: Bearer` viene ignorato.**
+  - *Perché:* le chiamate dei client tecnici finivano alla pagina di login del router.
+  - *Verifica:* una chiamata del client tecnico attraverso il router con `x-approuter-authorization` (200) e con `Authorization` (al login).
+  - *Passi:* `APPROUTER_BTP`, `API_CONSUMER_SETUP`, `KYMA_DEPLOY_CHECK`, `CF_DEPLOY_CHECK`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Con XSUAA l'unico ingresso esterno è l'approuter: un'APIRule con regola JWT su `/odata` rifiuta le sessioni del browser, e il `jwksUri` OIDC non vale per XSUAA.**
+  - *Perché:* con la regola JWT sull'APIRule del servizio le app nel browser ricevevano errori di autenticazione.
+  - *Verifica:* nel chart nessuna APIRule JWT sul servizio dietro il router; il servizio raggiunto solo dal router.
+  - *Passi:* `KYMA_BUILD`, `KYMA_DEPLOY_CHECK`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **XSUAA: un role template con attributi obbligatori senza valore predefinito dà role collection vuote; gli scope di un token `client_credentials` vengono solo dalle `authorities`; la `description` di un role template sta entro 1000 caratteri.**
+  - *Perché:* role collection assegnate che non davano accesso, un client tecnico senza scope e un deploy rifiutato per una descrizione troppo lunga.
+  - *Verifica:* i ruoli creati con il valore dell'attributo; le `authorities` del client tecnico in `xs-security.json`; un controllo sulla lunghezza delle descrizioni.
+  - *Passi:* `AUTH_MATRIX`, `CAP_MODEL`, `KYMA_ROLES_DEV`, `CF_ROLES_DEV`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **PodSecurity `restricted`: ogni container con `seccompProfile: RuntimeDefault`, e in una NetworkPolicy l'uscita verso istiod sulla porta 15012, senza la quale il sidecar non parte.**
+  - *Perché:* i pod non partivano, o restavano senza sidecar, nel namespace con la PodSecurity restricted.
+  - *Verifica:* `kubectl get pods` Ready con il sidecar; nel chart il `securityContext` e la regola di uscita verso istiod.
+  - *Passi:* `KYMA_BUILD`, `KYMA_DEPLOY_CHECK`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Telemetria su Kyma: gli endpoint OTLP per segnale vogliono il percorso completo (`/v1/traces`), serve `OTEL_EXPORTER_OTLP_PROTOCOL`, e il gateway del modulo Telemetry nasce solo quando esiste una pipeline.**
+  - *Perché:* tracce e metriche non arrivavano, senza un errore nell'app.
+  - *Verifica:* la pipeline creata prima dell'app; le variabili OTLP con il percorso del segnale; una traccia vista nel backend.
+  - *Passi:* `OBSERVABILITY`, `KYMA_BUILD`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **`xs-app.json` non ammette chiavi di commento (`_comment`): l'approuter va in CrashLoop.**
+  - *Perché:* un commento aggiunto per documentare una route ha fermato il router all'avvio.
+  - *Verifica:* un controllo che `xs-app.json` abbia solo le chiavi dello schema del router.
+  - *Passi:* `APPROUTER_BTP`, `LAUNCHPAD_CHANGE`, `KYMA_BUILD`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **`ui5-task-zipper` fallisce se un valore del manifest contiene `\"`: lo zip non nasce, e l'immagine dell'approuter viene rifiutata.**
+  - *Perché:* un testo con le virgolette nel `manifest.json` ha bloccato il build della UI senza un errore chiaro.
+  - *Verifica:* dopo la build, lo zip di ogni app c'è; nei testi del manifest le virgolette tipografiche o i riferimenti i18n.
+  - *Passi:* `KYMA_BUILD`, `CF_BUILD`, `APPROUTER_BTP`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **«Approuter e html5-repo, non Work Zone» dà app senza launchpad: niente shell, logo, ritorno alla home e menu utente. Il launchpad è una scelta di UX, con la conseguenza scritta.**
+  - *Perché:* l'utente ha notato subito le app «non standard»; la soluzione è stata un launchpad nell'app, `sap.f.ShellBar` con una home a tile per ruolo.
+  - *Verifica:* in `docs/ux.md` la scelta (Work Zone, launchpad nell'app, nessuno) e la conseguenza; nella shell il menu dell'utente come quello del launchpad di SAP.
+  - *Passi:* `UX_DESIGN`, `APPROUTER_BTP`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Un cluster Kyma gratuito scade dopo pochi giorni: la scadenza va nel registro del landscape (*Scade il*), e lo spostamento si pianifica prima.**
+  - *Perché:* il cluster dello sviluppo scadeva il 27 ottobre, e nessuno lo vedeva finché un deploy non fosse fallito.
+  - *Verifica:* il subaccount ha la data di scadenza nel configuratore; l'inizio di sessione avvisa nella settimana prima.
+  - *Passi:* `BTP_ENVIRONMENT`, `KYMA_DEPLOY_DEV`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+
+## Processo
+
+- **Un passo per volta, chiuso solo con l'evidenza del suo controllo; ogni domanda con AskUserQuestion, mai per un segreto.**
+  - *Perché:* un passo chiuso a voce è un passo che nessuno può ricontrollare.
+  - *Verifica:* ogni passo chiuso ha il suo rapporto in `.claude/nova/reports/`.
+  - *Passi:* tutti.
+  - *Fonte:* nova-archivelink-gateway (CLAUDE.md), «Un passo per volta».
+- **Verifica prima di correggere, e parallelizza le correzioni solo su gruppi di file disgiunti.**
+  - *Perché:* un rilievo CRITICAL su tre era allucinato; due agenti sullo stesso file si sovrascrivono in silenzio.
+  - *Verifica:* leggere il codice vero prima di ogni correzione; raggruppare per file, non per tema.
+  - *Passi:* `CODE_REVIEW`, `APP_AUDIT`, ogni sfida.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), regole di correzione 2026-08-12.
+- **Prima di dichiarare assente uno strumento o un oggetto, misuralo.**
+  - *Perché:* un prefisso sbagliato e un `ls .claude/skills` hanno fatto saltare una fase per settimane; il silenzio di una fonte è stato preso per una sua affermazione.
+  - *Verifica:* si interroga un oggetto della stessa categoria di cui si conosce la risposta.
+  - *Passi:* `TOOLKIT_VERIFY`, `SOURCES_CHECK`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), «Prima di scrivere strumento non disponibile».
+- **Le opzioni si misurano prima di presentarle a chi decide; il mercato si misura prima di costruire un'integrazione su un protocollo SAP standard.**
+  - *Perché:* due costi messi per iscritto si sono rivelati falsi; almeno cinque content server certificati esistevano già.
+  - *Verifica:* nel sorgente o con una ricerca di mercato, prima della decisione.
+  - *Passi:* `SCENARIO_RESEARCH`, `SOLUTION_DESIGN`.
+  - *Fonte:* nova-invoice-suite (CLAUDE.md), R20-01, ricerca di mercato R13.
+- **Dopo un audit il perimetro si congela: subito si correggono solo i difetti bloccanti (500, login, dati sbagliati), il resto va in un backlog con priorità.**
+  - *Perché:* la stima dei tempi è stata sbagliata di molto: i collaudi reali fanno emergere difetti a cascata, e l'utente ha dovuto chiedere lui di fermare il perimetro.
+  - *Verifica:* dopo ogni audit, la lista dei rilievi divisa fra bloccanti (correggi ora) e backlog (`docs/backlog.md`), decisa con l'utente a scelta.
+  - *Passi:* `AS_IS_BASELINE`, `APP_AUDIT`, `CODE_REVIEW`, `REQUIREMENTS_SPEC`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Agenti in parallelo sullo stesso albero: mai `git stash`, `git checkout -- .`, `git reset` o `git clean`; per un confronto, un `git worktree` temporaneo fuori dal repository.**
+  - *Perché:* due agenti hanno lanciato `git stash` e `git stash pop` sul working tree comune, togliendo per qualche secondo le modifiche in corso degli altri.
+  - *Verifica:* il prompt di ogni agente lo dice; `git worktree list` vuoto a fine lavoro.
+  - *Passi:* tutti.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Molti agenti, un file: ognuno scrive la sua parte (`_parts/<gruppo>_<file>`), poi un agente solo unisce, toglie i doppioni e aggiunge il gate.**
+  - *Perché:* la localizzazione di circa 640 messaggi in tre gruppi paralleli doveva scrivere tutta nello stesso `messages_*.properties`; con le parti e l'unione ha funzionato.
+  - *Verifica:* un gate confronta il file unito con le chiavi usate nel codice, nei due versi.
+  - *Passi:* `I18N_COMPLETENESS`, `CODE_REVIEW`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Un agente fermato a metà non consegna il rapporto: prima di dichiarare conclusa la sua attività si controllano commit e processi, e se il rapporto manca si rilancia la verifica finale.**
+  - *Perché:* il coordinatore credeva al lavoro un agente che si era fermato.
+  - *Verifica:* `git log` dei commit attesi, i processi ancora attivi, la suite rilanciata direttamente.
+  - *Passi:* tutti.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **I server di prova si fermano per PID, salvato all'avvio, mai con `pkill -f <pattern>`.**
+  - *Perché:* `pkill -f` ha chiuso i processi di altri agenti che lavoravano sullo stesso PC.
+  - *Verifica:* lo script che avvia un server ne scrive il PID; lo stop usa quello.
+  - *Passi:* tutti.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **La suite completa si esegue ad albero fermo, nessun agente che scrive, e il riepilogo si legge dal log, non dal codice d'uscita.**
+  - *Perché:* una suite lanciata mentre altri agenti scrivevano dava esiti che non si potevano ripetere.
+  - *Verifica:* prima della suite completa nessun agente attivo sul repository; il conteggio di passati, falliti e saltati letto dal log.
+  - *Passi:* `UNIT_TESTS_CAP`, `REGRESSION_TESTS`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Ogni decisione chiesta all'utente si registra nel piano di lavoro, con l'opzione consigliata per prima e quella scelta.**
+  - *Perché:* nella revisione il piano delle correzioni ha tenuto il filo di decine di decisioni prese a scelta, e nessuna è stata rifatta.
+  - *Verifica:* ogni domanda a scelta ha la sua riga nel piano (`docs/` o `internal/audit/<data>-remediation-plan.md`).
+  - *Passi:* `REQUIREMENTS_SPEC`, `APP_AUDIT`, `CODE_REVIEW`.
+  - *Fonte:* nova-invoice-suite, revisione complessiva su Kyma e PostgreSQL, 2026-10-08.
+- **Una modifica fatta dopo la chiusura dei passi RIAPRE i passi che tocca, e si richiudono prima del deploy: una richiesta fuori dal playbook non è fuori dai suoi controlli.**
+  - *Perché:* la shell standard e l'ingresso in Fiori Elements sono stati costruiti durante `RELEASE_AUDIT`, su richiesta dell'utente, come lavoro «a lato». I passi che toccavano (`LAUNCHPAD_CHANGE`, `FE_RUN_CHECK`, `UI_TESTS`, `CF_BUILD`, `CF_DEPLOY_CHECK`) erano stati elencati come da riaprire, ma il deploy è partito prima: le loro lezioni e i loro controlli non hanno girato, e il difetto l'ha trovato l'utente su BTP.
+  - *Verifica:* prima di `CF_BUILD` e di ogni deploy, i file cambiati dall'ultima chiusura (`git diff --name-only`) si riportano ai passi che li possiedono; ognuno si riapre (`install.mjs reopen`) e si richiude con la sua evidenza, lezioni comprese (`nova-config.mjs lessons <PASSO>`).
+  - *Passi:* tutti.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-15.
+- **Le skill sono conoscenza, non controlli: un errore che sta FRA due componenti (il sito del launchpad e la CSP dell'approuter) non lo copre nessuna skill da sola. Lo copre solo una prova sul percorso completo dell'esercizio.**
+  - *Perché:* c'erano le skill del launchpad, della CSP, di Fiori Elements e dell'approuter, ognuna giusta sul suo pezzo; nessuna parla dell'incontro fra i due, e le prove ne guardavano uno alla volta.
+  - *Verifica:* per ogni catena dell'esercizio (browser → approuter → app → servizio) c'è almeno una prova che la percorre intera con la configurazione di produzione (intestazioni, rotte, autenticazione); dove non si può in locale, si dichiara «NON VERIFICATO» fino al controllo su BTP con un login vero.
+  - *Passi:* tutti.
+  - *Fonte:* nova-archivelink-gateway, 2026-10-15.

@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/nova/install.mjs session",
+            "statusMessage": "Checking the NOVA skills"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "btp-administration",
+    "calm",
+    "drawio",
+    "exa",
+    "fiori-mcp",
+    "playwright",
+    "sap-docs",
+    "ui5-mcp-server"
+  ],
+  "enabledPlugins": {
+    "sap-dependency-security@nova-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "nova-skills": {
+      "source": {
+        "source": "settings",
+        "name": "nova-skills",
+        "plugins": [
+          {
+            "name": "sap-dependency-security",
+            "source": {
+              "source": "git-subdir",
+              "url": "https://github.com/secondsky/sap-skills.git",
+              "path": "plugins/sap-dependency-security",
+              "sha": "652a861d3ed422b71f01c8805f9ec03b14017cd8"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

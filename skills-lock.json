@@ -1,0 +1,481 @@
+{
+  "version": 1,
+  "skills": {
+    "bridge-injection": {
+      "source": "mrkanitkar/praman-sap-testing",
+      "ref": "0c130fc170c49a69d9c58fada99f91779ad4e21c",
+      "sourceType": "github",
+      "skillPath": "skills/bridge-injection/SKILL.md",
+      "computedHash": "7395b4b520f086c609b51b125472d56524194373b4b7996f27fd866b772eaabe"
+    },
+    "btp-cli": {
+      "source": "SAP-samples/joule-a2a-agent-toolkit",
+      "ref": "7d284bd6d6e83f2ce9e3bf164689adc9db9ad4f1",
+      "sourceType": "github",
+      "skillPath": "skills/btp-cli/SKILL.md",
+      "computedHash": "6e5665d3307e15af07baab10cde4bf6bd18fc4770c5f30665f07e4f05cbe5114"
+    },
+    "btp-diagram-generator": {
+      "source": "likweitan/abap-skills",
+      "ref": "b3306bea54e7a2e408deb2acdddfb8eb52e3768c",
+      "sourceType": "github",
+      "skillPath": "skills/btp-diagram-generator/SKILL.md",
+      "computedHash": "707f0071d8a9261486dd6ac24b7efb7adc5320cf51dec0dc98d644719126a253"
+    },
+    "btp-workzone": {
+      "source": "DanKromp/skillOverflow",
+      "ref": "bfea98869237d2c37578f118bc5ad49c0dc1efdf",
+      "sourceType": "github",
+      "skillPath": "skills/btp-workzone/SKILL.md",
+      "computedHash": "affacee9ecefc69532e20c74910006f42d653b0520906badc225901a650ba34b"
+    },
+    "cf-cli": {
+      "source": "SAP-samples/joule-a2a-agent-toolkit",
+      "ref": "7d284bd6d6e83f2ce9e3bf164689adc9db9ad4f1",
+      "sourceType": "github",
+      "skillPath": "skills/cf-cli/SKILL.md",
+      "computedHash": "5c25e4d6bea09ceb4d713c40b4adf68b6dcd7bf50ad11e1f6e5606c3a863efb6"
+    },
+    "cli-syntax": {
+      "source": "mrkanitkar/praman-sap-testing",
+      "ref": "0c130fc170c49a69d9c58fada99f91779ad4e21c",
+      "sourceType": "github",
+      "skillPath": "skills/cli-syntax/SKILL.md",
+      "computedHash": "79fff41012ee87e956e67505097e3cffb66deaa1f0194197cf016cd51692eace"
+    },
+    "doc-coauthoring": {
+      "source": "anthropics/skills",
+      "ref": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "sourceType": "github",
+      "skillPath": "skills/doc-coauthoring/SKILL.md",
+      "computedHash": "b964e4c3ffe13f66f76dd7919073e60c7aec622cd8a8363bb36323188100cf8e"
+    },
+    "drawio": {
+      "source": "jgraph/drawio-mcp",
+      "ref": "cfc1b916b9deaa7c78d23d719d4124bd76d2d0bf",
+      "sourceType": "github",
+      "skillPath": "plugins/claude-code/skills/drawio/SKILL.md",
+      "computedHash": "f7738fc49f20b54e9714935691992ce36f043bd5e5194d7e714ec5e1de3beac8"
+    },
+    "drawio-skill-sap": {
+      "source": "lofonD/SAP-BTP-Architecture-Diagram-Generator",
+      "ref": "820fc56ecb35d2c676040c959b27c42b9b662bf6",
+      "sourceType": "github",
+      "skillPath": "skills/drawio-skill-sap/SKILL.md",
+      "computedHash": "66757c1e6ca8054b3599701501d48345558144d324c2b7cf5bee7dc123befab9"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "ref": "e781cb4d07433dfe1d19e924ed45cc61738c55ec",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "913b9d37d0d54047dd65222bb8c67b2bf04e3cb87dcad1729068d7a8b2c8c396"
+    },
+    "fiori-annotations": {
+      "source": "DanKromp/skillOverflow",
+      "ref": "bfea98869237d2c37578f118bc5ad49c0dc1efdf",
+      "sourceType": "github",
+      "skillPath": "skills/fiori-annotations/SKILL.md",
+      "computedHash": "173eed902d58602c020416153b07dc9fd6d8909a4865cb4016fb6c6af6f5f406"
+    },
+    "fiori-elements": {
+      "source": "mrkanitkar/praman-sap-testing",
+      "ref": "0c130fc170c49a69d9c58fada99f91779ad4e21c",
+      "sourceType": "github",
+      "skillPath": "skills/fiori-elements/SKILL.md",
+      "computedHash": "bd5a3db1920fa84fc000016ebe248a40c78342d66657989f9ee6f7cd7dca8330"
+    },
+    "fiori-elements-floorplans": {
+      "source": "DanKromp/skillOverflow",
+      "ref": "bfea98869237d2c37578f118bc5ad49c0dc1efdf",
+      "sourceType": "github",
+      "skillPath": "skills/fiori-elements-floorplans/SKILL.md",
+      "computedHash": "f5ca966d7ac82b4068e75b3d7e0744ae5f55ce64d727fb2fc8f5731eadbbeec5"
+    },
+    "fiori-navigation": {
+      "source": "DanKromp/skillOverflow",
+      "ref": "bfea98869237d2c37578f118bc5ad49c0dc1efdf",
+      "sourceType": "github",
+      "skillPath": "skills/fiori-navigation/SKILL.md",
+      "computedHash": "33a244dce744e7fa784adbcadaae30e540d89b3e45ea5e20bd35d4d03f62816e"
+    },
+    "fix-bootstrap-params": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-bootstrap-params/SKILL.md",
+      "computedHash": "81161229a72ba4ab33ef18dec0871f36af4123a82965799406097b0d9cb272ce"
+    },
+    "fix-component-async": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-component-async/SKILL.md",
+      "computedHash": "791f38526029d4fff53e9c66a32cbb14d0f42549b6f935e9277c0596b5b1f536"
+    },
+    "fix-control-renderer": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-control-renderer/SKILL.md",
+      "computedHash": "82376a859124cf6dac31212abc3316478f70177c68269e6e7eae2e3ecdc5a35e"
+    },
+    "fix-csp-compliance": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-csp-compliance/SKILL.md",
+      "computedHash": "ba8064f0211d6b7f93d60105a166bbc381859346e5a6b71be561730c993e561a"
+    },
+    "fix-cyclic-deps": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-cyclic-deps/SKILL.md",
+      "computedHash": "a4ddda69043fdb052a554e4e42d45c57f2d7e07ffafc0bb364993fc8a92353ec"
+    },
+    "fix-deprecated-controls": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-deprecated-controls/SKILL.md",
+      "computedHash": "20898e133b32fff514bba3e0ea1b94e46c22baaa818c5850d6f7b9d8a096f8b0"
+    },
+    "fix-js-globals": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-js-globals/SKILL.md",
+      "computedHash": "b6b43ebb779bd796656856cc7b7aa2aa25c1ed59504f76feaec129af6f8079ef"
+    },
+    "fix-library-init": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-library-init/SKILL.md",
+      "computedHash": "c46bae82c3e6259f51a6d88dd9e3d6443f6d193e4426b8cf9d0705667593b34a"
+    },
+    "fix-linter-blind-spots": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-linter-blind-spots/SKILL.md",
+      "computedHash": "94af39ee253b068bce14de1640d8479d300c03c8edfcb511167ed96f61353f20"
+    },
+    "fix-manifest-json": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-manifest-json/SKILL.md",
+      "computedHash": "6366026138e26b402b84226b2d89abaad8fccf81524ae3df81f0c52eccc881c2"
+    },
+    "fix-partially-deprecated-apis": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-partially-deprecated-apis/SKILL.md",
+      "computedHash": "f94e0e9559f18a182ae77be0ca065e5a3bba0d8e94dc10de211f4f38be88cd67"
+    },
+    "fix-pseudo-modules": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-pseudo-modules/SKILL.md",
+      "computedHash": "1ff6408a53fd1f83b2afe56c1bc531592f1903c1cfa0a9fc16f6d7be8fc46ade"
+    },
+    "fix-table-row-mode": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-table-row-mode/SKILL.md",
+      "computedHash": "cb355dd3a2f9469520978dd2ae8db81b3ced37cecb00ab0798edcc5f87a97ae6"
+    },
+    "fix-xml-globals": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-xml-globals/SKILL.md",
+      "computedHash": "0ee605a224cb1055dc6d8780b984048a7c4a1d9bb70969fe2600ce7a58bb6551"
+    },
+    "fix-xml-native-html": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-modernization/skills/fix-xml-native-html/SKILL.md",
+      "computedHash": "61b4346fd2b305e0a23064231955a7d5cbfd4dafddb3722ea9518fe92b12ee55"
+    },
+    "navigation": {
+      "source": "mrkanitkar/praman-sap-testing",
+      "ref": "0c130fc170c49a69d9c58fada99f91779ad4e21c",
+      "sourceType": "github",
+      "skillPath": "skills/navigation/SKILL.md",
+      "computedHash": "ad5078bee47d6e857afdda3bf491cab245395e6290933612f5e5ccdef75693e3"
+    },
+    "nova-calm-write": {
+      "source": "Raistlin82/nova-app-builder-skill",
+      "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+      "sourceType": "github",
+      "skillPath": "skills/nova-calm-write/SKILL.md",
+      "computedHash": "fbbd8450b390baa0d56ce1430e68f1124ae7f0ca12859d7d9a43e8d5657faea1"
+    },
+    "nova-ips-provisioning": {
+      "source": "Raistlin82/nova-app-builder-skill",
+      "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+      "sourceType": "github",
+      "skillPath": "skills/nova-ips-provisioning/SKILL.md",
+      "computedHash": "9996b43d61fc2f5dd228f51fa78d3e49dfa4c30a1357272617bc9a10265b776b"
+    },
+    "nova-wolf": {
+      "source": "Raistlin82/nova-app-builder-skill",
+      "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+      "sourceType": "github",
+      "skillPath": "skills/nova-wolf/SKILL.md",
+      "computedHash": "bc4dbd3b1e4939cd16bffdab6d27265bed00b7559c34ef7be3b691db775c1f5d"
+    },
+    "odata-testing": {
+      "source": "mrkanitkar/praman-sap-testing",
+      "ref": "0c130fc170c49a69d9c58fada99f91779ad4e21c",
+      "sourceType": "github",
+      "skillPath": "skills/odata-testing/SKILL.md",
+      "computedHash": "97aed7f2507adcfbba18698376cfc06194d3dfcfa856e05b77aa56ed24019994"
+    },
+    "sap-authentication": {
+      "source": "mrkanitkar/praman-sap-testing",
+      "ref": "0c130fc170c49a69d9c58fada99f91779ad4e21c",
+      "sourceType": "github",
+      "skillPath": "skills/sap-authentication/SKILL.md",
+      "computedHash": "fdc3ec201bf9bbec414d4d567d64b77c3e0b7c8a556026bd0534e2a9fc371c87"
+    },
+    "sap-btp-best-practices": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-btp-best-practices/skills/sap-btp-best-practices/SKILL.md",
+      "computedHash": "091bbb3e156008a80097a5d07ade8ca26c9a7ee0ceb35d65fa730fcd2a164d27"
+    },
+    "sap-btp-business-application-studio": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-btp-business-application-studio/skills/sap-btp-business-application-studio/SKILL.md",
+      "computedHash": "203fb31ddd1c42429c818cf623e55869d88b28c3785d580c061b6e24dba48541"
+    },
+    "sap-btp-cloud-identity-services": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-btp-cloud-identity-services/skills/sap-btp-cloud-identity-services/SKILL.md",
+      "computedHash": "a6290e539aaa8567070a8f9cb9390d030408babcfd8e177c3c449ea2a8a10251"
+    },
+    "sap-btp-cloud-logging": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-btp-cloud-logging/skills/sap-btp-cloud-logging/SKILL.md",
+      "computedHash": "50d1a88c12939fea97308877b59e612e444a4995dfe83380b4a992f2e2923337"
+    },
+    "sap-btp-cloud-platform": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-btp-cloud-platform/skills/sap-btp-cloud-platform/SKILL.md",
+      "computedHash": "71fc09655093ef637fdc23e4ba5a3aeed9ae2aac0150a493501b6e9d9f031cc1"
+    },
+    "sap-btp-cloud-transport-management": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-btp-cloud-transport-management/skills/sap-btp-cloud-transport-management/SKILL.md",
+      "computedHash": "494e6040ac15c144704d97024e608dd6d1cf858db364d3e50acbcb4cd6897886"
+    },
+    "sap-btp-developer-guide": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-btp-developer-guide/skills/sap-btp-developer-guide/SKILL.md",
+      "computedHash": "1148f888c4d44ebd15265d2df98c2a9c663535b0941763dfeabf4d4b4e94f1c6"
+    },
+    "sap-btp-service-manager": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-btp-service-manager/skills/sap-btp-service-manager/SKILL.md",
+      "computedHash": "85fbb5e8a4af2b1b5c180f97060b89d03519308cfe46e0b54d9347da8f15e402"
+    },
+    "sap-fiori": {
+      "source": "SAP-samples/cap-agentic-engineered",
+      "ref": "a70fd5f6bb66ffb878b0db805aca2c94a7435a32",
+      "sourceType": "github",
+      "skillPath": "skills/sap-fiori/SKILL.md",
+      "computedHash": "81d1885d89cf2588b8a2b87503aabc81c875f6a432ecbd8200570f9cb4cdd93b"
+    },
+    "sap-fiori-app-development": {
+      "source": "SAP/open-ux-tools",
+      "ref": "d133fcedd354d1beba63483c764550820d325461",
+      "sourceType": "github",
+      "skillPath": "plugins-coding-agents/fiori/skills/sap-fiori-app-development/SKILL.md",
+      "computedHash": "80b7a297beb1d3e80a60ebc3f705660e6a8a2e167b9655eb7b2dbad7ea05e67d"
+    },
+    "sap-fiori-create-cli": {
+      "source": "SAP/open-ux-tools",
+      "ref": "d133fcedd354d1beba63483c764550820d325461",
+      "sourceType": "github",
+      "skillPath": "plugins-coding-agents/fiori/skills/sap-fiori-create-cli/SKILL.md",
+      "computedHash": "f9b51ae3d8082e818f9c20cbf685993e7a67978fa699d4aa32b917c9e6313f11"
+    },
+    "sap-fiori-guidelines": {
+      "source": "SAP/ai-skills-library",
+      "ref": "cd0bb455ec68db3f83db94b200546618c32f8ab2",
+      "sourceType": "github",
+      "skillPath": "skills/sap-fiori-guidelines/SKILL.md",
+      "computedHash": "9b9df87bb0bf1f86e115fd671ba44afd16ed7754c27bc4e36fddcd651c755fb4"
+    },
+    "sap-fiori-tools": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sap-fiori-tools/skills/sap-fiori-tools/SKILL.md",
+      "computedHash": "d91968d0ca0b3551af53d3db3c7e581e9174ab6adf32029cff4d2ee72afb1539"
+    },
+    "sap-fiori-tree-table": {
+      "source": "SAP/open-ux-tools",
+      "ref": "d133fcedd354d1beba63483c764550820d325461",
+      "sourceType": "github",
+      "skillPath": "plugins-coding-agents/fiori/skills/sap-fiori-tree-table/SKILL.md",
+      "computedHash": "dce6ba9a358d56a2a1e7554d44d370ad043f5de032947ccf98e5fc1c6610626b"
+    },
+    "sapui5": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sapui5/skills/sapui5/SKILL.md",
+      "computedHash": "272ef854a5946530ec9b9e78d07ab2685fccb25d3bcb7e46a2a6ab79b4aa224d"
+    },
+    "sapui5-cli": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sapui5-cli/skills/sapui5-cli/SKILL.md",
+      "computedHash": "fdd4306aca5ad49660c1ae02ce241ac235ade894d5e9eb3762efa9edac9c2ec5"
+    },
+    "sapui5-linter": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": "plugins/sapui5-linter/skills/sapui5-linter/SKILL.md",
+      "computedHash": "10cc33a3a9986da5db8cf3865692a5f972d95289eeb71f6079938641f9e6b3fc"
+    },
+    "ui-theme-designer-design-tokens": {
+      "source": "SAP/ui-theme-designer-plugins-for-coding-agents",
+      "ref": "3eff5832700d85e550b28a3ae58c1763382e405a",
+      "sourceType": "github",
+      "skillPath": "plugins/ui-theme-designer/skills/ui-theme-designer-design-tokens/SKILL.md",
+      "computedHash": "255894b99fb36f8f86998c36e0dd31f9d063ffa21daef7e63490f501faddc3cf"
+    },
+    "ui-theme-designer-help": {
+      "source": "SAP/ui-theme-designer-plugins-for-coding-agents",
+      "ref": "3eff5832700d85e550b28a3ae58c1763382e405a",
+      "sourceType": "github",
+      "skillPath": "plugins/ui-theme-designer/skills/ui-theme-designer-help/SKILL.md",
+      "computedHash": "09425f935ba31c4521e124619705ba102e3cb659efb3ac11d219d621f66a4163"
+    },
+    "ui5-best-practices": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "a99b882ce364ef4b9f52fb4054f5f410c1636563",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5/skills/ui5-best-practices/SKILL.md",
+      "computedHash": "a8f3a17d81c462be09c6dedf2d32ec5fb87ed2e89630d8a06109c4c2edc365b4"
+    },
+    "ui5-best-practices-accessibility": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "a99b882ce364ef4b9f52fb4054f5f410c1636563",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5/skills/ui5-best-practices-accessibility/SKILL.md",
+      "computedHash": "2a5103769e8a1d6ef49ea73bb146c02626dfc187d918a762c866e443fe5191bf"
+    },
+    "ui5-best-practices-integration-cards": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "a99b882ce364ef4b9f52fb4054f5f410c1636563",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5/skills/ui5-best-practices-integration-cards/SKILL.md",
+      "computedHash": "585c70c7fbe78c9dc784ffdbeb1311b1100c803b5409fbb9abe723113590b548"
+    },
+    "ui5-best-practices-mdc": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "a99b882ce364ef4b9f52fb4054f5f410c1636563",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5/skills/ui5-best-practices-mdc/SKILL.md",
+      "computedHash": "048d7c85bc1b670cfc1279d676a5bb7b442e7bb6238e83d6b32c6b4a901b5e9c"
+    },
+    "ui5-best-practices-qunit": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "a99b882ce364ef4b9f52fb4054f5f410c1636563",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5/skills/ui5-best-practices-qunit/SKILL.md",
+      "computedHash": "b5ff4a87b94cd051aa7848c788faa0ccc5e25d8d71ea7d3cbe6d2a5098c0857a"
+    },
+    "ui5-best-practices-tables": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "a99b882ce364ef4b9f52fb4054f5f410c1636563",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5/skills/ui5-best-practices-tables/SKILL.md",
+      "computedHash": "e82f0fa32f9a894cc17e3dad1651adf500000e3c5f99d894e83224e46cabde44"
+    },
+    "ui5-controls": {
+      "source": "mrkanitkar/praman-sap-testing",
+      "ref": "0c130fc170c49a69d9c58fada99f91779ad4e21c",
+      "sourceType": "github",
+      "skillPath": "skills/ui5-controls/SKILL.md",
+      "computedHash": "ee297becfd5fd07d15fac36a9691c5a4b368c42090afb19f0295460240457bc1"
+    },
+    "ui5-custom-controls": {
+      "source": "DanKromp/skillOverflow",
+      "ref": "bfea98869237d2c37578f118bc5ad49c0dc1efdf",
+      "sourceType": "github",
+      "skillPath": "skills/ui5-custom-controls/SKILL.md",
+      "computedHash": "6d95d6bb1fc08b0d97278cd960ae517023137f9a17fd224175f350c242893db5"
+    },
+    "ui5-data-binding": {
+      "source": "DanKromp/skillOverflow",
+      "ref": "bfea98869237d2c37578f118bc5ad49c0dc1efdf",
+      "sourceType": "github",
+      "skillPath": "skills/ui5-data-binding/SKILL.md",
+      "computedHash": "b4524153b7586ab8ee357ae0b23e3f044f5ba90dab47e6d682eb72831158207a"
+    },
+    "ui5-i18n": {
+      "source": "DanKromp/skillOverflow",
+      "ref": "bfea98869237d2c37578f118bc5ad49c0dc1efdf",
+      "sourceType": "github",
+      "skillPath": "skills/ui5-i18n/SKILL.md",
+      "computedHash": "c290090692ab9ce3fae1cfcbbec87e97eecb2cd00a5cc98dcf5f3ef11dda6914"
+    },
+    "ui5-typescript-conversion": {
+      "source": "UI5/plugins-coding-agents",
+      "ref": "2b8c4a944e39609214bce7aef3b05260985f0e91",
+      "sourceType": "github",
+      "skillPath": "plugins/ui5-typescript-conversion/skills/ui5-typescript-conversion/SKILL.md",
+      "computedHash": "a5ff717163290d4e6136b9b6f4bb4ba155c9d89a2b32fbe69bbbf750e1ffd5bb"
+    },
+    "verification": {
+      "source": "mrkanitkar/praman-sap-testing",
+      "ref": "0c130fc170c49a69d9c58fada99f91779ad4e21c",
+      "sourceType": "github",
+      "skillPath": "skills/verification/SKILL.md",
+      "computedHash": "509d71c5e4884cfca604123d0230f29cd0cd102cfbd4214c03fca5a5dc8468d2"
+    },
+    "web-perf": {
+      "source": "secondsky/sap-skills",
+      "ref": "652a861d3ed422b71f01c8805f9ec03b14017cd8",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/web-perf/SKILL.md",
+      "computedHash": "7ae53856c320574f7440f50aef7892f96837eec9fd49d329d049d432fb4b299a"
+    },
+    "webapp-testing": {
+      "source": "anthropics/skills",
+      "ref": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "sourceType": "github",
+      "skillPath": "skills/webapp-testing/SKILL.md",
+      "computedHash": "ad5b1fc52807e9afa4635e59218a026b164dc58b6c3f41b0f7c644dcd6ccf572"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "users": [
+    {
+      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User", "urn:ietf:params:scim:schemas:extension:sap:2.0:User"],
+      "userName": "nova.test.viewer",
+      "name": { "givenName": "Nova", "familyName": "Viewer" },
+      "emails": [{ "value": "nova.test.viewer@example.com", "type": "work", "primary": true }],
+      "active": true,
+      "urn:ietf:params:scim:schemas:extension:sap:2.0:User": { "sendMail": true }
+    },
+    {
+      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User", "urn:ietf:params:scim:schemas:extension:sap:2.0:User"],
+      "userName": "nova.test.approver",
+      "name": { "givenName": "Nova", "familyName": "Approver" },
+      "emails": [{ "value": "nova.test.approver@example.com", "type": "work", "primary": true }],
+      "active": true,
+      "urn:ietf:params:scim:schemas:extension:sap:2.0:User": { "sendMail": true }
+    }
+  ],
+  "groups": [
+    {
+      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:Group", "urn:sap:cloud:scim:schemas:extension:custom:2.0:Group"],
+      "displayName": "BTP_SALESORDER_VIEWER",
+      "urn:sap:cloud:scim:schemas:extension:custom:2.0:Group": { "name": "BTP_SALESORDER_VIEWER", "description": "Visualizzatori ordini (sviluppo)" }
+    }
+  ],
+  "memberships": [
+    { "group": "BTP_SALESORDER_VIEWER", "users": ["nova.test.viewer", "nova.test.approver"] }
+  ]
+}

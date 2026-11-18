@@ -1,0 +1,36 @@
+{
+  "title": "Ordini di vendita: approvazione di un ordine sopra soglia",
+  "projectId": "11111111-1111-1111-1111-111111111111",
+  "scopeId": "01234567-89ab-cdef-0123-456789abcdef",
+  "priorityCode": 20,
+  "isPrepared": false,
+  "toActivities": [
+    {
+      "title": "Approvazione dell'ordine",
+      "sequence": 1,
+      "isInScope": true,
+      "toApplications": [
+        { "title": "Gestione ordini di vendita", "url": "https://<launchpad>/#SalesOrder-manage" }
+      ],
+      "toActions": [
+        {
+          "title": "Aprire un ordine sopra soglia",
+          "description": "Given un ordine di 12.000 EUR in stato In approvazione, When l'approvatore lo apre",
+          "expectedResult": "Then vede i pulsanti Approva e Rifiuta",
+          "sequence": 1,
+          "isEvidenceRequired": true
+        },
+        {
+          "title": "Approvare",
+          "description": "When sceglie Approva",
+          "expectedResult": "Then l'ordine passa in stato Approvato e il richiedente riceve la notifica",
+          "sequence": 2,
+          "isEvidenceRequired": true
+        }
+      ]
+    }
+  ],
+  "toReferences": [
+    { "name": "Specifica, US-03", "url": "https://github.com/<org>/<app>/blob/main/docs/specification.md#us-03" }
+  ]
+}

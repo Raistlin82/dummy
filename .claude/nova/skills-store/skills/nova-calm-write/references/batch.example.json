@@ -1,0 +1,7 @@
+[
+  { "command": "create-requirement", "title": "Approvazione degli ordini sopra soglia", "external-id": "REQ-01",
+    "description": "<p>Gli ordini sopra 10.000 EUR richiedono l'approvazione del responsabile vendite.</p>" },
+  { "command": "create-user-story", "title": "Come approvatore voglio approvare un ordine sopra soglia", "external-id": "US-03",
+    "description": "<p>Given un ordine sopra soglia, When l'approvatore sceglie Approva, Then l'ordine è Approvato.</p>" },
+  { "command": "create-user-story", "title": "Come richiedente voglio sapere l'esito dell'approvazione", "external-id": "US-04" }
+]

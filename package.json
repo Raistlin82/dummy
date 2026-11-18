@@ -1,0 +1,13 @@
+{
+  "name": "dummy",
+  "private": true,
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@cyclonedx/cyclonedx-npm": "7.0.0",
+    "@ui5/cli": "4.1.0",
+    "@ui5/linter": "1.23.10",
+    "lockfile-lint": "5.1.0",
+    "mbt": "1.2.53",
+    "ui5-test-runner": "5.14.2"
+  }
+}
