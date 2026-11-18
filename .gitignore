@@ -95,3 +95,4 @@
 /.claude/skills/web-perf
 /.claude/skills/webapp-testing
 # <<< nova skills
+node_modules/
