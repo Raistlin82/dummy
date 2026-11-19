@@ -42,7 +42,7 @@ Missing landscapes (test, production, transports) are asked to the developer bef
 
 What the application must do: [REQUEST.md](REQUEST.md).
 
-Playbook: 6/76 steps closed, 1 deviation. Next: BRANCH_AND_PR · Branch di sviluppo e pull request (action, skill cli-git). Run: node .claude/nova/install.mjs next
+Playbook: 8/76 steps closed, 1 deviation. Next: SCENARIO_RESEARCH · Ricerca dello scenario sulla documentazione SAP (action, skill mcp-sap-docs, challenge required). Run: node .claude/nova/install.mjs next
 
 ## A · Fondamenta
 
@@ -50,9 +50,9 @@ Playbook: 6/76 steps closed, 1 deviation. Next: BRANCH_AND_PR · Branch di svilu
 - [x] **SKILLS_DISCOVERY** · Skill per le funzioni ancora da coprire · _action_ · `find-skills` — done 2026-11-19: no function Da coprire in PLAYBOOK.md (none marked 'none: done by hand'); nothing to search
 - [x] **BTP_ENVIRONMENT** · Ambiente SAP BTP pronto · _gate_ · `mcp-btp-admin` — done 2026-11-19, decided by gabriele@key2.it: btp CLI (gabriele.rendina@lutech.it) + cf (session of c.ferraro@key2.it, read only). Subaccount dev-emykt6ie 83bccc77 eu10 OK; org nova-dev-org/space nova-dev-space exist; entitlements assigned: destination lite, html5-apps-repo app-host+app-runtime, build-workzone-standard foundation, SAPLaunchpad, application-frontend free, identity application. Decision: no Work Zone site, project approuter (profile to change in the configurator); Cloud Logging not assigned by choice (test). Nothing added. NOT VERIFIED (403, missing Subaccount Viewer): subaccount trust with IAS aww4s9pgx, subscriptions, role collections: open request to admins before DEPLOY_PREREQS. Forced: TOOLKIT_VERIFY, SKILLS_DISCOVERY still open. Report in docs/handoff.md (deviation: closed before TOOLKIT_VERIFY, SKILLS_DISCOVERY)
 - [x] **PROJECT_CONVENTIONS** · Convenzioni del progetto in CLAUDE.md · _action_ · `init` — done 2026-11-19 in 1 min: CLAUDE.md written: purpose/type/target/landscape, repo structure, no build/test/lint commands yet, one-step rule, AskUserQuestion rule
-- [ ] **BRANCH_AND_PR** · Branch di sviluppo e pull request · _action_ · `cli-git`
-- [ ] **SOURCES_CHECK** · Fonti SAP raggiungibili · _gate_ · `mcp-sap-docs`
-- [ ] **SCENARIO_RESEARCH** · Ricerca dello scenario sulla documentazione SAP · _action_ · `mcp-sap-docs` · challenge required
+- [x] **BRANCH_AND_PR** · Branch di sviluppo e pull request · _action_ · `cli-git` — done 2026-11-19 in 0 min: branch feature/sample on origin (pushed cb03894); draft PR to main opened by the executor at session end (no gh here), per the run instructions
+- [x] **SOURCES_CHECK** · Fonti SAP raggiungibili · _gate_ · `mcp-sap-docs` — done 2026-11-19 in 0 min: sap-docs probe by nova-researcher 2026-11-19: search returned 30 results, fetch of /sapui5/06_SAP_Fiori_Elements/list-report-page-1cf5c7f OK (OData V4 list report). ui5-mcp-server, fiori-mcp, exa are command-based servers not connected in this sandbox: NOT probed here
+- [ ] **SCENARIO_RESEARCH** · Ricerca dello scenario sulla documentazione SAP · _action_ · `mcp-sap-docs` · challenge required · reviewed by mcp-fiori, mcp-ui5 · not reviewed by mcp-exa
 ## B · Discovery & Design
 
 - [ ] **CALM_PROJECT** · Lo sviluppo nel progetto SAP Cloud ALM · _action_ · `nova-calm-write`
@@ -250,6 +250,10 @@ Confronta l'elenco con il playbook (.claude/nova/PLAYBOOK.md): per ogni attivit�
 **Fallback:** find-skills, when the skill cannot run
 
 **Challengers:** mcp-exa, mcp-fiori, mcp-ui5 (challenge required)
+
+- Review of mcp-exa: could not review (not in the sandbox of Claude Managed Agents (exa server not connected; no web search here))
+- Review of mcp-fiori: 7 accepted, 1 rejected, 1 escalated (docs/challenges/SCENARIO_RESEARCH-mcp-fiori.md)
+- Review of mcp-ui5: 7 accepted, 1 rejected (docs/challenges/SCENARIO_RESEARCH-mcp-ui5.md)
 
 **Output:** docs/research.md
 

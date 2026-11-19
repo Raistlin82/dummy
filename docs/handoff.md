@@ -55,3 +55,17 @@ NOT VERIFIED (403 for gabriele.rendina@lutech.it on the subaccount) — open req
 - assign Subaccount Viewer (or Administrator) on dev-emykt6ie to the developer, then re-read: trust with IAS aww4s9pgx in Security › Trust Configuration, subscriptions, role collections;
 - SAP Cloud Logging (cloud-logging, plan dev) not assigned to the subaccount;
 - test and production subaccounts not registered in the landscape: to be asked before UAT_TEST and the release.
+
+## Decision of the person (c.ferraro@key2.it, run 6a959218-dd1f-4c44-80e6-651579dd4c8c)
+
+- BTP_ENVIRONMENT closed by the person in Claude Code and pushed; the run goes on from the next step.
+  (Pulling their state reopened TOOLKIT_VERIFY and SKILLS_DISCOVERY, which were closed again here per the earlier decision.)
+
+## Run stopped at SCENARIO_RESEARCH (needs a person)
+
+Closed in this run: TOOLKIT_VERIFY, SKILLS_DISCOVERY (re-closed), PROJECT_CONVENTIONS, BRANCH_AND_PR, SOURCES_CHECK.
+SCENARIO_RESEARCH: docs/research.md is written (69 activities, 4 MANCANTE G1-G4), challenges recorded (mcp-fiori 7/1/1, mcp-ui5 7/1/0), fixes applied. It cannot close without:
+
+1. **Decision on the escalated finding** (then `node .claude/nova/install.mjs done SCENARIO_RESEARCH --by "<who>"`): the request wants a draft-enabled Fiori elements app but "no backend"; a deployed app on CF cannot do draft without a service. Options in docs/research.md, section "Open decision for a person": (a) minimal CAP/RAP backend, (b) mock data on CF, no draft persistence, (c) drop draft from the request.
+2. **mcp-exa challenger** did not review (exa server and web search not available in this sandbox): either run that review where exa is connected, or accept the deviation (`done ... --force`).
+3. Also open: the profile still says Work Zone standard site while BTP_ENVIRONMENT decided no site (approuter): change the profile in the configurator. The 4 gaps (G1-G4) could not be sent to the configurator (unreachable): re-send them with nova-config.mjs gap after login (texts in docs/research.md).
