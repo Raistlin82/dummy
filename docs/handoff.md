@@ -98,3 +98,8 @@ Needed, one of:
 ## Decision of the person (c.ferraro@key2.it, run c8561bcd-ec7a-4812-afe8-f5fa655ceff9)
 
 - No work with SAP Cloud ALM, now or in future runs: never try to interact with Cloud ALM. Steps whose only purpose is Cloud ALM are skipped with this reason.
+
+## SPEC_APPROVAL: A-03 asked for a change (choice on mock data on CF)
+
+A-03 found that mock data on CF needs a running OData V4 service component (a backend-like process), which conflicts with D1 "no backend". Options: (i) mock service on CF, writable; (ii) same, read-only; (iii) no data on CF (CF check = login, start, 403, console; draft/create/edit verified locally on the mock server only).
+Resolved by the Lead on the standing instruction of c.ferraro ("do not stop for choices the request already resolves"; request = minimal dummy, no backend; D1): option (iii), the smallest reading, no runtime data component on CF, and the app does not go past the development subaccount (release steps are the person's anyway). To be confirmed or changed by c.ferraro at any time with `spec-change`.
