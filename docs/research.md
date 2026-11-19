@@ -20,7 +20,7 @@ Documented sources (V = page found and snippet/page read in sap-docs on the fix-
 - **(b) Deploy with mock data and no draft persistence**: the deployed app shows static/mock data; create/edit is not persisted. Matches "no backend", but draft is not demonstrable on CF and APP_URL_CHECK/WORKZONE_CHECK ("with the data of the backend") need a different criterion. Whether the mock behaviour is faithful to the draft protocol is **I**.
 - **(c) Drop draft from the request**: List Report + Object Page read-only or non-draft edit with mock data; the request text changes (draft removed from the scenario and from FE_ANNOTATIONS).
 
-Until a person picks one, §1 rows 1.6, 4.3, 6.6 and caveat 1 stay conditional.
+**Decision (c.ferraro@key2.it, run f81a98e6-45ac-4207-b1cb-113fdebf42af): no backend; minimal test app as the request says (option b).** Mock data, draft is not persisted on CF; §1 rows 1.6, 4.3, 6.6 and caveat 1 are read in that way (no backend, the checks "with the data of the backend" use a mock-data criterion). The source of the research is SAP Docs; the `exa` challenger did not review: «exa non disponibile in questa esecuzione» (deviation closed with --force on the person's decision).
 
 ## 0. How to read this document
 

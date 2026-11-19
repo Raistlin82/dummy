@@ -69,3 +69,18 @@ SCENARIO_RESEARCH: docs/research.md is written (69 activities, 4 MANCANTE G1-G4)
 1. **Decision on the escalated finding** (then `node .claude/nova/install.mjs done SCENARIO_RESEARCH --by "<who>"`): the request wants a draft-enabled Fiori elements app but "no backend"; a deployed app on CF cannot do draft without a service. Options in docs/research.md, section "Open decision for a person": (a) minimal CAP/RAP backend, (b) mock data on CF, no draft persistence, (c) drop draft from the request.
 2. **mcp-exa challenger** did not review (exa server and web search not available in this sandbox): either run that review where exa is connected, or accept the deviation (`done ... --force`).
 3. Also open: the profile still says Work Zone standard site while BTP_ENVIRONMENT decided no site (approuter): change the profile in the configurator. The 4 gaps (G1-G4) could not be sent to the configurator (unreachable): re-send them with nova-config.mjs gap after login (texts in docs/research.md).
+
+## Decision of the person (c.ferraro@key2.it, run f81a98e6-45ac-4207-b1cb-113fdebf42af)
+
+- SCENARIO_RESEARCH: source is SAP Docs; exa is not connected and is only an alternative: close with --force, noting «exa non disponibile in questa esecuzione».
+- Choice: no backend, minimal test app as the request says (option b); written in docs/research.md.
+- From now on: do not stop for reviewers that are not connected, nor for choices the request already resolves.
+
+## Run stopped at CALM_PROJECT (needs a person)
+
+Closed this run after the person's decision: SCENARIO_RESEARCH (--force, exa not available; no backend, minimal test app).
+CALM_PROJECT cannot run unattended: no CALM_* credentials in the sandbox and the `calm` MCP is not connected, so nothing was read from Cloud ALM (nothing written either). docs/technical.md, section "SAP Cloud ALM", lists what is missing.
+Needed:
+- From the Cloud ALM project lead: project ID, roadmap and current phase, scope, deployment-plan release, sprint, and the role holders (project lead, requirement approver, tester, Change Manager, Deployment Manager).
+- From a Cloud ALM admin: a read-only API instance (calm-api.*.read, incl. projects.read), credentials in the environment (CALM_TENANT, CALM_REGION, CALM_CLIENT_ID, CALM_CLIENT_SECRET) or Credential Store; or run this step in Claude Code with the `calm` MCP connected.
+Then register: nova-config.mjs alm <development ID> --tenant https://key-to-business-srl-cloudalm.eu20.alm.cloud.sap --calm-project <ID> --release <release>.
