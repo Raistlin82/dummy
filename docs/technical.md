@@ -31,3 +31,6 @@ Da fornire:
   scritture successive, un'istanza separata con gli scope minimi (tasks, testcases, features,
   documents read/write); le credenziali nell'ambiente o in SAP Credential Store, mai nel repository.
 - Collegamento nel configuratore (`nova-config.mjs alm`): non registrato, servono ID progetto e release.
+
+### Decision on SAP Cloud ALM
+Decision of c.ferraro@key2.it (run c8561bcd-ec7a-4812-afe8-f5fa655ceff9): this development does not work with SAP Cloud ALM. Nothing is read from or written to it; the items above stay unread on purpose.

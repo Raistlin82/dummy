@@ -94,3 +94,7 @@ Result of the retry: still not readable from this Claude Managed Agents sandbox.
 Needed, one of:
 - run CALM_PROJECT where the key is mapped (Nova WOLF runtime / Claude Code with `calm` MCP), or map the key into this run's environment (`CALM_WRITE_SERVICE_KEY`, `CALM_TENANT`, `CALM_REGION`, or `NOVA_CALM_WRITE_FILE`);
 - or the project lead supplies by hand: project ID, release, sprint, scope, roles, so docs/technical.md and `nova-config.mjs alm` can be filled.
+
+## Decision of the person (c.ferraro@key2.it, run c8561bcd-ec7a-4812-afe8-f5fa655ceff9)
+
+- No work with SAP Cloud ALM, now or in future runs: never try to interact with Cloud ALM. Steps whose only purpose is Cloud ALM are skipped with this reason.

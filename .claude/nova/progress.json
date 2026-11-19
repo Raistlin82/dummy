@@ -41,7 +41,12 @@
       "tree": "bb9c018686122cae127a5f2c82e927c49be024bb"
     },
     "SCENARIO_RESEARCH": {
+      "status": "DONE",
       "started": "2026-11-19T17:03:53.464Z",
+      "at": "2026-11-19T17:17:12.342Z",
+      "evidence": "docs/research.md: 69 activities, 4 MANCANTE (G1-G4); mcp-fiori 7/1/1 and mcp-ui5 7/1/0 fixed; escalated draft-vs-no-backend decided by c.ferraro: no backend, minimal test app. exa non disponibile in questa esecuzione (forced, decided by c.ferraro)",
+      "by": "c.ferraro@key2.it",
+      "deviation": "closed without the review of mcp-exa, installed",
       "challenges": {
         "mcp-exa": {
           "at": "2026-11-19T17:08:12.034Z",
@@ -62,6 +67,16 @@
           "escalated": 0
         }
       }
+    },
+    "CALM_PROJECT": {
+      "status": "SKIPPED",
+      "started": "2026-11-19T17:17:13.745Z",
+      "at": "2026-11-19T20:38:17.521Z",
+      "reason": "Decision of c.ferraro@key2.it: no work with SAP Cloud ALM, now or in the future (docs/handoff.md, CLAUDE.md, docs/technical.md)",
+      "deviation": "mandatory step skipped"
+    },
+    "REQUIREMENTS_SPEC": {
+      "started": "2026-11-19T20:38:17.625Z"
     }
   }
 }

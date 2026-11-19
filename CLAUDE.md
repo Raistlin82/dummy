@@ -23,3 +23,6 @@ No npm scripts are defined yet and no app exists: there are no build, test or li
 
 ## Questions to the user
 Every question goes through the AskUserQuestion tool with multiple-choice answers: 2 to 4 options drawn from the configurator, the repository or the request, the recommended one first (marked as such, with the reason). Confirmations and approvals are choices too. Never ask for secrets.
+
+## SAP Cloud ALM
+Decision of c.ferraro@key2.it (run c8561bcd-ec7a-4812-afe8-f5fa655ceff9): this development does not work with SAP Cloud ALM. Never read from or write to Cloud ALM (no `calm` MCP, no `nova-calm-write`); skip the steps that exist only for it, with this decision as the reason.

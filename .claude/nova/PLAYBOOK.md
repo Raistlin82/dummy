@@ -42,7 +42,7 @@ Missing landscapes (test, production, transports) are asked to the developer bef
 
 What the application must do: [REQUEST.md](REQUEST.md).
 
-Playbook: 8/76 steps closed, 1 deviation. Next: SCENARIO_RESEARCH · Ricerca dello scenario sulla documentazione SAP (action, skill mcp-sap-docs, challenge required). Run: node .claude/nova/install.mjs next
+Playbook: 10/76 steps closed, 3 deviations. Next: REQUIREMENTS_SPEC · Specifica dei requisiti (action, skill doc-coauthoring). Run: node .claude/nova/install.mjs next
 
 ## A · Fondamenta
 
@@ -52,10 +52,10 @@ Playbook: 8/76 steps closed, 1 deviation. Next: SCENARIO_RESEARCH · Ricerca del
 - [x] **PROJECT_CONVENTIONS** · Convenzioni del progetto in CLAUDE.md · _action_ · `init` — done 2026-11-19 in 1 min: CLAUDE.md written: purpose/type/target/landscape, repo structure, no build/test/lint commands yet, one-step rule, AskUserQuestion rule
 - [x] **BRANCH_AND_PR** · Branch di sviluppo e pull request · _action_ · `cli-git` — done 2026-11-19 in 0 min: branch feature/sample on origin (pushed cb03894); draft PR to main opened by the executor at session end (no gh here), per the run instructions
 - [x] **SOURCES_CHECK** · Fonti SAP raggiungibili · _gate_ · `mcp-sap-docs` — done 2026-11-19 in 0 min: sap-docs probe by nova-researcher 2026-11-19: search returned 30 results, fetch of /sapui5/06_SAP_Fiori_Elements/list-report-page-1cf5c7f OK (OData V4 list report). ui5-mcp-server, fiori-mcp, exa are command-based servers not connected in this sandbox: NOT probed here
-- [ ] **SCENARIO_RESEARCH** · Ricerca dello scenario sulla documentazione SAP · _action_ · `mcp-sap-docs` · challenge required · reviewed by mcp-fiori, mcp-ui5 · not reviewed by mcp-exa
+- [x] **SCENARIO_RESEARCH** · Ricerca dello scenario sulla documentazione SAP · _action_ · `mcp-sap-docs` · challenge required — done 2026-11-19 in 13 min, decided by c.ferraro@key2.it: docs/research.md: 69 activities, 4 MANCANTE (G1-G4); mcp-fiori 7/1/1 and mcp-ui5 7/1/0 fixed; escalated draft-vs-no-backend decided by c.ferraro: no backend, minimal test app. exa non disponibile in questa esecuzione (forced, decided by c.ferraro) · reviewed by mcp-fiori, mcp-ui5 · not reviewed by mcp-exa (deviation: closed without the review of mcp-exa, installed)
 ## B · Discovery & Design
 
-- [ ] **CALM_PROJECT** · Lo sviluppo nel progetto SAP Cloud ALM · _action_ · `nova-calm-write`
+- [-] **CALM_PROJECT** · Lo sviluppo nel progetto SAP Cloud ALM · _action_ · `nova-calm-write` — skipped 2026-11-19: Decision of c.ferraro@key2.it: no work with SAP Cloud ALM, now or in the future (docs/handoff.md, CLAUDE.md, docs/technical.md) (deviation: mandatory step skipped)
 - [ ] **REQUIREMENTS_SPEC** · Specifica dei requisiti · _action_ · `doc-coauthoring`
 - [ ] **SPEC_APPROVAL** · Approvazione della specifica · _approval_ · decided by A-03
 - [ ] **CALM_BACKLOG** · Il backlog nel progetto SAP Cloud ALM · _action_ · `nova-calm-write`
