@@ -42,7 +42,7 @@ Missing landscapes (test, production, transports) are asked to the developer bef
 
 What the application must do: [REQUEST.md](REQUEST.md).
 
-Playbook: 10/76 steps closed, 3 deviations. Next: REQUIREMENTS_SPEC · Specifica dei requisiti (action, skill doc-coauthoring). Run: node .claude/nova/install.mjs next
+Playbook: 11/76 steps closed, 3 deviations. Next: SPEC_APPROVAL · Approvazione della specifica (approval). Run: node .claude/nova/install.mjs next
 
 ## A · Fondamenta
 
@@ -56,7 +56,7 @@ Playbook: 10/76 steps closed, 3 deviations. Next: REQUIREMENTS_SPEC · Specifica
 ## B · Discovery & Design
 
 - [-] **CALM_PROJECT** · Lo sviluppo nel progetto SAP Cloud ALM · _action_ · `nova-calm-write` — skipped 2026-11-19: Decision of c.ferraro@key2.it: no work with SAP Cloud ALM, now or in the future (docs/handoff.md, CLAUDE.md, docs/technical.md) (deviation: mandatory step skipped)
-- [ ] **REQUIREMENTS_SPEC** · Specifica dei requisiti · _action_ · `doc-coauthoring`
+- [x] **REQUIREMENTS_SPEC** · Specifica dei requisiti · _action_ · `doc-coauthoring` — done 2026-11-19 in 4 min: docs/specification.md: 7 REQ, 6 US with 21 G/W/T criteria, 14 NFR with thresholds; follows decisions: no backend (mock), no Work Zone site, no Cloud ALM; assumptions A1-A9 and conflicts C1-C3 listed for the person
 - [ ] **SPEC_APPROVAL** · Approvazione della specifica · _approval_ · decided by A-03
 - [ ] **CALM_BACKLOG** · Il backlog nel progetto SAP Cloud ALM · _action_ · `nova-calm-write`
 - [ ] **SOLUTION_DESIGN** · Architettura e solution design · _action_ · `btp-diagram-generator` · challenge required
