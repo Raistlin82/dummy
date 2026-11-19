@@ -73,7 +73,7 @@ SCENARIO_RESEARCH: docs/research.md is written (69 activities, 4 MANCANTE G1-G4)
 ## Decision of the person (c.ferraro@key2.it, run f81a98e6-45ac-4207-b1cb-113fdebf42af)
 
 - SCENARIO_RESEARCH: source is SAP Docs; exa is not connected and is only an alternative: close with --force, noting «exa non disponibile in questa esecuzione».
-- Choice: no backend, minimal test app as the request says (option b); written in docs/research.md.
+- Choice: no backend, minimal test app as the request says; written in docs/research.md. (Correction: "(option b)" in the first version of this line was added by the Lead, it is not in the person's words; see the verbatim below.)
 - From now on: do not stop for reviewers that are not connected, nor for choices the request already resolves.
 
 ## Run stopped at CALM_PROJECT (needs a person)

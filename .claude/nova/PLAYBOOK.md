@@ -56,7 +56,7 @@ Playbook: 11/76 steps closed, 3 deviations. Next: SPEC_APPROVAL · Approvazione 
 ## B · Discovery & Design
 
 - [-] **CALM_PROJECT** · Lo sviluppo nel progetto SAP Cloud ALM · _action_ · `nova-calm-write` — skipped 2026-11-19: Decision of c.ferraro@key2.it: no work with SAP Cloud ALM, now or in the future (docs/handoff.md, CLAUDE.md, docs/technical.md) (deviation: mandatory step skipped)
-- [x] **REQUIREMENTS_SPEC** · Specifica dei requisiti · _action_ · `doc-coauthoring` — done 2026-11-19 in 4 min: docs/specification.md: 7 REQ, 6 US with 21 G/W/T criteria, 14 NFR with thresholds; follows decisions: no backend (mock), no Work Zone site, no Cloud ALM; assumptions A1-A9 and conflicts C1-C3 listed for the person
+- [x] **REQUIREMENTS_SPEC** · Specifica dei requisiti · _action_ · `doc-coauthoring` — done 2026-11-19 in 4 min: docs/specification.md: 7 REQ, 6 US with 20 G/W/T criteria (16 Local, 4 CF), 14 NFR; assumptions A1-A10, open points C1-C6; decisions: no backend (person), D4/D5 Lead readings to be confirmed by c.ferraro (C6); amended once, last 2026-11-19: evidence corrected after A-03 review
 - [ ] **SPEC_APPROVAL** · Approvazione della specifica · _approval_ · decided by A-03
 - [ ] **CALM_BACKLOG** · Il backlog nel progetto SAP Cloud ALM · _action_ · `nova-calm-write`
 - [ ] **SOLUTION_DESIGN** · Architettura e solution design · _action_ · `btp-diagram-generator` · challenge required

@@ -79,7 +79,20 @@
       "status": "DONE",
       "started": "2026-11-19T20:38:17.625Z",
       "at": "2026-11-19T20:42:37.513Z",
-      "evidence": "docs/specification.md: 7 REQ, 6 US with 21 G/W/T criteria, 14 NFR with thresholds; follows decisions: no backend (mock), no Work Zone site, no Cloud ALM; assumptions A1-A9 and conflicts C1-C3 listed for the person"
+      "evidence": "docs/specification.md: 7 REQ, 6 US with 20 G/W/T criteria (16 Local, 4 CF), 14 NFR; assumptions A1-A10, open points C1-C6; decisions: no backend (person), D4/D5 Lead readings to be confirmed by c.ferraro (C6)",
+      "amendments": [
+        {
+          "at": "2026-11-19T20:55:58.443Z",
+          "evidence": "docs/specification.md: 7 REQ, 6 US with 20 G/W/T criteria (16 Local, 4 CF), 14 NFR; assumptions A1-A10, open points C1-C6; decisions: no backend (person), D4/D5 Lead readings to be confirmed by c.ferraro (C6)",
+          "note": "evidence corrected after A-03 review"
+        }
+      ],
+      "earlier": [
+        {
+          "evidence": "docs/specification.md: 7 REQ, 6 US with 21 G/W/T criteria, 14 NFR with thresholds; follows decisions: no backend (mock), no Work Zone site, no Cloud ALM; assumptions A1-A9 and conflicts C1-C3 listed for the person",
+          "at": "2026-11-19T20:42:37.513Z"
+        }
+      ]
     },
     "SPEC_APPROVAL": {
       "started": "2026-11-19T20:42:37.652Z"
