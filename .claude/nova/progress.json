@@ -8,6 +8,27 @@
       "tree": "1f23ace55b90204000b81f4d7253aff6e47aecea",
       "by": "gabriele@key2.it",
       "deviation": "closed before TOOLKIT_VERIFY, SKILLS_DISCOVERY"
+    },
+    "TOOLKIT_VERIFY": {
+      "status": "DONE",
+      "started": "2026-11-19T17:02:40.273Z",
+      "at": "2026-11-19T17:02:49.751Z",
+      "evidence": "verify exits 0; person (c.ferraro) decided exit 0 is enough; re-closed after the state of the branch (BTP_ENVIRONMENT closed by the person) reopened it",
+      "tree": "1f23ace55b90204000b81f4d7253aff6e47aecea"
+    },
+    "SKILLS_DISCOVERY": {
+      "status": "DONE",
+      "at": "2026-11-19T17:02:49.862Z",
+      "evidence": "no function Da coprire in PLAYBOOK.md (none marked 'none: done by hand'); nothing to search"
+    },
+    "PROJECT_CONVENTIONS": {
+      "status": "DONE",
+      "started": "2026-11-19T17:02:49.941Z",
+      "at": "2026-11-19T17:03:21.305Z",
+      "evidence": "CLAUDE.md written: purpose/type/target/landscape, repo structure, no build/test/lint commands yet, one-step rule, AskUserQuestion rule"
+    },
+    "BRANCH_AND_PR": {
+      "started": "2026-11-19T17:03:21.394Z"
     }
   }
 }

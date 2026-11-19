@@ -42,14 +42,14 @@ Missing landscapes (test, production, transports) are asked to the developer bef
 
 What the application must do: [REQUEST.md](REQUEST.md).
 
-Playbook: 3/76 steps closed, 1 deviation. Next: TOOLKIT_VERIFY · Verifica degli strumenti del piano (gate, skill nova-wolf). Run: node .claude/nova/install.mjs next
+Playbook: 6/76 steps closed, 1 deviation. Next: BRANCH_AND_PR · Branch di sviluppo e pull request (action, skill cli-git). Run: node .claude/nova/install.mjs next
 
 ## A · Fondamenta
 
-- [ ] **TOOLKIT_VERIFY** · Verifica degli strumenti del piano · _gate_ · `nova-wolf`
-- [ ] **SKILLS_DISCOVERY** · Skill per le funzioni ancora da coprire · _action_ · `find-skills`
+- [x] **TOOLKIT_VERIFY** · Verifica degli strumenti del piano · _gate_ · `nova-wolf` — done 2026-11-19 in 0 min: verify exits 0; person (c.ferraro) decided exit 0 is enough; re-closed after the state of the branch (BTP_ENVIRONMENT closed by the person) reopened it
+- [x] **SKILLS_DISCOVERY** · Skill per le funzioni ancora da coprire · _action_ · `find-skills` — done 2026-11-19: no function Da coprire in PLAYBOOK.md (none marked 'none: done by hand'); nothing to search
 - [x] **BTP_ENVIRONMENT** · Ambiente SAP BTP pronto · _gate_ · `mcp-btp-admin` — done 2026-11-19, decided by gabriele@key2.it: btp CLI (gabriele.rendina@lutech.it) + cf (session of c.ferraro@key2.it, read only). Subaccount dev-emykt6ie 83bccc77 eu10 OK; org nova-dev-org/space nova-dev-space exist; entitlements assigned: destination lite, html5-apps-repo app-host+app-runtime, build-workzone-standard foundation, SAPLaunchpad, application-frontend free, identity application. Decision: no Work Zone site, project approuter (profile to change in the configurator); Cloud Logging not assigned by choice (test). Nothing added. NOT VERIFIED (403, missing Subaccount Viewer): subaccount trust with IAS aww4s9pgx, subscriptions, role collections: open request to admins before DEPLOY_PREREQS. Forced: TOOLKIT_VERIFY, SKILLS_DISCOVERY still open. Report in docs/handoff.md (deviation: closed before TOOLKIT_VERIFY, SKILLS_DISCOVERY)
-- [ ] **PROJECT_CONVENTIONS** · Convenzioni del progetto in CLAUDE.md · _action_ · `init`
+- [x] **PROJECT_CONVENTIONS** · Convenzioni del progetto in CLAUDE.md · _action_ · `init` — done 2026-11-19 in 1 min: CLAUDE.md written: purpose/type/target/landscape, repo structure, no build/test/lint commands yet, one-step rule, AskUserQuestion rule
 - [ ] **BRANCH_AND_PR** · Branch di sviluppo e pull request · _action_ · `cli-git`
 - [ ] **SOURCES_CHECK** · Fonti SAP raggiungibili · _gate_ · `mcp-sap-docs`
 - [ ] **SCENARIO_RESEARCH** · Ricerca dello scenario sulla documentazione SAP · _action_ · `mcp-sap-docs` · challenge required
