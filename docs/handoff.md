@@ -84,3 +84,13 @@ Needed:
 - From the Cloud ALM project lead: project ID, roadmap and current phase, scope, deployment-plan release, sprint, and the role holders (project lead, requirement approver, tester, Change Manager, Deployment Manager).
 - From a Cloud ALM admin: a read-only API instance (calm-api.*.read, incl. projects.read), credentials in the environment (CALM_TENANT, CALM_REGION, CALM_CLIENT_ID, CALM_CLIENT_SECRET) or Credential Store; or run this step in Claude Code with the `calm` MCP connected.
 Then register: nova-config.mjs alm <development ID> --tenant https://key-to-business-srl-cloudalm.eu20.alm.cloud.sap --calm-project <ID> --release <release>.
+
+## Decision of the person (c.ferraro@key2.it, run c19431c4-5648-4721-81af-e532d5c4c74e)
+
+- CALM_PROJECT: retry now that the keys are in SAP Credential Store.
+
+Result of the retry: still not readable from this Claude Managed Agents sandbox. nova-calm-write §12 expects the service key (Credential Store password `nova-calm-write-key-key-to-business-srl-cloudalm`, namespace `nova-wolf-executor`) to be mapped by the executor into `CALM_WRITE_SERVICE_KEY` (+ `CALM_TENANT`, `CALM_REGION`) or a file named by `NOVA_CALM_WRITE_FILE`; none of these is present here, and the `calm` MCP is not connected. The Credential Store route for Managed Agents is marked "to verify" in §12. Nothing was read or written in Cloud ALM.
+
+Needed, one of:
+- run CALM_PROJECT where the key is mapped (Nova WOLF runtime / Claude Code with `calm` MCP), or map the key into this run's environment (`CALM_WRITE_SERVICE_KEY`, `CALM_TENANT`, `CALM_REGION`, or `NOVA_CALM_WRITE_FILE`);
+- or the project lead supplies by hand: project ID, release, sprint, scope, roles, so docs/technical.md and `nova-config.mjs alm` can be filled.
