@@ -1,6 +1,6 @@
 # Specification · Sample
 
-Step REQUIREMENTS_SPEC · written 2026-11-19 · author: developer agent (Nova WOLF, unattended run) · status: **draft, revised after A-03's change request at SPEC_APPROVAL (no data on CF, D4); waiting for SPEC_APPROVAL (A-03)**.
+Step REQUIREMENTS_SPEC · written 2026-11-19 · author: developer agent (Nova WOLF, unattended run) · status: **draft, revised after A-03's change request at SPEC_APPROVAL (no data on CF, D4) and again after A-03's second review (D1 quoted as written, D4 and D5 as the Lead's readings, C5 settled); waiting for SPEC_APPROVAL (A-03)**.
 
 New development, so there is no starting state to compare against. The request does not name a functional owner or any documents.
 
@@ -15,7 +15,7 @@ The request in full: *"Applicazione dummy per prova. fai una cosa minima solo pe
 - a List Report and an Object Page on OData V4, run on local mock data;
 - create and edit with draft, on the local mock;
 - TypeScript and SAPUI5 1.148;
-- deployed to SAP BTP Cloud Foundry (development subaccount `dev-emykt6ie` only), opened through the project's application router, with **no data on CF** (D4).
+- deployed to SAP BTP Cloud Foundry (development subaccount `dev-emykt6ie` only, D5), opened through the project's application router, with **no data on CF** (D4).
 
 The app has no business purpose. Success means the procedure runs and every acceptance criterion below passes. It does not mean a business result.
 
@@ -23,10 +23,11 @@ The app has no business purpose. Success means the procedure runs and every acce
 
 | # | Decision | By / where |
 |---|---|---|
-| D1 | No backend. The app is a minimal test app on mock data, and drafts are not persisted (option b). | c.ferraro@key2.it, run f81a98e6, `docs/research.md` |
+| D1 | **No backend, minimal test app.** The person's choice, as recorded in `docs/handoff.md` (run f81a98e6): *"Choice: no backend, minimal test app as the request says (option b)"*. `docs/research.md` (line 23) records it as: *"Decision (c.ferraro@key2.it, run f81a98e6-…): no backend; minimal test app as the request says (option b). Mock data, draft is not persisted on CF; §1 rows 1.6, 4.3, 6.6 and caveat 1 are read in that way (no backend, the checks 'with the data of the backend' use a mock-data criterion)."* The person's words are "no backend, minimal test app". "Mock data on CF" comes from the research's description of option (b) and from the note added to the decision, not from the person's words. | c.ferraro@key2.it, run f81a98e6, `docs/handoff.md`, `docs/research.md` |
 | D2 | No SAP Build Work Zone site. The app is opened through the project's own application router. | developer, BTP_ENVIRONMENT, `docs/handoff.md` |
 | D3 | No SAP Cloud ALM. | c.ferraro@key2.it, run c8561bcd, `CLAUDE.md` |
-| D4 | No data component on CF (option iii). On CF the app is checked only for login redirect, start, 403 without role, a clean console and security headers. List data, create, edit and draft are verified on the local mock only. The app does not go past the development subaccount in this spec. | Lead, on c.ferraro's standing instruction (*"do not stop for choices the request already resolves"*), `docs/handoff.md` "SPEC_APPROVAL: A-03 asked for a change". c.ferraro can confirm or change it with `spec-change`. |
+| D4 | No data component on CF (option iii). This is **the Lead's reading of D1**, not a choice the person made: a mock OData V4 service running on CF would itself be a backend-like component (§4.3), which contradicts the person's words "no backend". On CF the app is checked only for login redirect, start of its own resources, 403 without role, the console (AC-06.2, C5) and security headers. List data, create, edit and draft are verified on the local mock only. | Lead, on c.ferraro's standing instruction (*"do not stop for choices the request already resolves"*), `docs/handoff.md` "SPEC_APPROVAL: A-03 asked for a change". **For c.ferraro to confirm**, or change with `spec-change`. |
+| D5 | Scope decision: the app does not go past the development subaccount in this spec (§6). | Lead, same instruction and section of `docs/handoff.md`. **For c.ferraro to confirm**, or change with `spec-change`. |
 
 **Profile conflicts.** The PLAYBOOK profile still says "Site di SAP Build Work Zone, standard edition" and "SAP Cloud ALM: Sì". This spec follows D2 and D3. Changing the profile in the configurator is open (see §9, C1).
 
@@ -156,10 +157,12 @@ There is no administrator, approver or display-only role. On the local mock ther
   - Given I have no session,
   - when I open the application-router URL,
   - then I am sent to the login page of the subaccount's application identity provider, and after login I come back to the app.
-- **AC-06.2** · CF, see C5
+- **AC-06.2** · CF (C5, settled)
   - Given I am logged in and have the app role,
   - when I open the application-router URL,
-  - then the app starts: the router serves the app's start page, the SAPUI5 1.148.x bootstrap and the app's `Component-preload.js` with HTTP 200, and the browser console shows no errors.
+  - then the app's own resources load: the router serves the app's start page, the SAPUI5 1.148.x bootstrap and the app's `Component-preload.js` with HTTP 200;
+  - the request for the service (`$metadata`) fails: on CF the app has no data service (D4), so this failure is **expected and accepted**;
+  - the browser console shows no error other than the failed service request. Any other console error fails the criterion.
 - **AC-06.3** · CF
   - Given I am logged in **without** the app role,
   - when I open the application-router URL,
@@ -202,7 +205,7 @@ There is no administrator, approver or display-only role. On the local mock ther
 
 "Draft" here means the client-side draft flow of Fiori elements for OData V4 (`editFlow`), driven against the local mock server, which answers the draft protocol. It does **not** mean durable storage of drafts. Whether the mock server follows the draft protocol faithfully is not verified (research §3, caveat 1). FE_RUN_CHECK verifies it on US-03 to US-05, on the local mock only.
 
-**Why there is no data on CF (D4).** Mock data on CF would need a running OData V4 service process, because a Fiori elements V4 app sends `$metadata` and `$batch` requests that static files cannot answer. That process is a backend-like component, which contradicts D1. The client-side `sap.ui.core.util.MockServer` covers only OData V2 and JSON; for OData V4, SAPUI5 points to CAP Node.js mocking (https://ui5.sap.com/#/topic/69d3cbd4150c4ffb884e788f7f60fd93). So on CF the app has no service to call. What the app shows on CF without a service is open (C5).
+**Why there is no data on CF (D4).** Mock data on CF would need a running OData V4 service process, because a Fiori elements V4 app sends `$metadata` and `$batch` requests that static files cannot answer. That process is a backend-like component, which contradicts D1. The client-side `sap.ui.core.util.MockServer` covers only OData V2 and JSON; for OData V4, SAPUI5 points to CAP Node.js mocking (https://ui5.sap.com/#/topic/69d3cbd4150c4ffb884e788f7f60fd93). So on CF the app has no service to call: its `$metadata` request fails, and that failure is expected and accepted (AC-06.2, C5).
 
 ### 4.4 Messages
 The app adds **no messages of its own**. Every message comes from SAP Fiori elements or SAPUI5, in the language of the user (§5, NFR-LANG).
@@ -225,7 +228,7 @@ Each threshold names the step that checks it. With STANDARD rigor, APP_PERFORMAN
 | **NFR-PERF-01** | Local mock run, desktop browser with a warm cache: the List Report table shows its rows within **3 s** of navigation start (median of 3 runs). | FE_RUN_CHECK (browser DevTools timing) |
 | **NFR-PERF-02** | Local mock run: opening an item from the List Report shows the Object Page header and section within **1.5 s** (median of 3 runs). | FE_RUN_CHECK |
 | **NFR-PERF-03** | The data requests of the List Report and Object Page are sent in OData `$batch` (local mock run). The deployed app uses an async SAPUI5 bootstrap and loads a `Component-preload.js` from the build (CF, AC-06.2). | FE_RUN_CHECK, APP_URL_CHECK, CODE_REVIEW |
-| **NFR-A11Y-01** | WCAG 2.2 level AA: **0 serious or critical** axe violations on the List Report and on the Object Page in display and edit mode (local mock run). | E2E_A11Y (axe, on the pages its smoke path opens) |
+| **NFR-A11Y-01** | WCAG 2.2 level AA: **0 serious or critical** axe violations on the start page (List Report) and on one detail page (Object Page in display mode), as the playbook's STANDARD smoke run prescribes (local mock run). **Added by this spec on top of the playbook:** the same threshold on the Object Page in edit mode, a Local check. | E2E_A11Y (axe on the start page and one detail page); edit mode: Local, axe in the same local run, recorded with the E2E_A11Y evidence |
 | **NFR-A11Y-02** | Every user story (US-01 to US-05) can be completed with the **keyboard only**. Every input field has a visible label taken from i18n. | E2E_A11Y smoke path for list, open, edit, save; manual check for create, discard and resume, recorded in FE_RUN_CHECK |
 | **NFR-A11Y-03** | No custom CSS or custom controls. The app works with the default SAP Horizon theme and with the Horizon high-contrast themes (`sap_horizon_hcb`, `sap_horizon_hcw`) with no lost content. | E2E_A11Y, manual check |
 | **NFR-SEC-01** | On CF, every app route needs authentication: a request without a session is redirected to the IdP login (AC-06.1). No route that serves the app has `authenticationType: none`; only the public SAPUI5 routes (`/resources`, `/test-resources`) may. | APP_URL_CHECK, SECURITY_REVIEW |
@@ -241,7 +244,7 @@ Each threshold names the step that checks it. With STANDARD rigor, APP_PERFORMAN
 
 - **A real backend**: a CAP or RAP service, a database, or any SAP system. Destinations to back-end systems are not needed.
 - **Any data service on CF**, including a mock OData service (D4). On CF there are no list data, no create, no edit and no draft.
-- **Going past the development subaccount.** Test, transport and production (for example UAT_TEST, CTMS_SETUP, GO_LIVE_APPROVAL, BTP_PROD_ENVIRONMENT, PROD_ROLE_ASSIGNMENTS, RELEASE_CF_PROD, PROD_ROLES_CHECK, SMOKE_PROD) are a person's job. This spec sets no criteria for them.
+- **Going past the development subaccount** (D5). Test, transport and production (for example UAT_TEST, CTMS_SETUP, GO_LIVE_APPROVAL, BTP_PROD_ENVIRONMENT, PROD_ROLE_ASSIGNMENTS, RELEASE_CF_PROD, PROD_ROLES_CHECK, SMOKE_PROD) are a person's job. This spec sets no criteria for them.
 - **Durable storage of data or drafts** (D1).
 - **Deleting items**, actions, value helps, child entities and attachments.
 - **Draft locking and collaboration between users**, and conflict handling.
@@ -266,8 +269,9 @@ Each threshold names the step that checks it. With STANDARD rigor, APP_PERFORMAN
 
 **What each step covers.**
 - **FE_RUN_CHECK** records a pass or fail result for each of the 16 Local criteria (AC-01.1 to AC-05.3), plus NFR-PERF-01/02 and the manual part of NFR-A11Y-02. It is the only step that verifies create, Discard, the required-field rule and leaving and resuming a draft.
-- **E2E_A11Y**, at STANDARD rigor, runs only a smoke path: open the list, open an item, edit, save. Axe runs on the List Report and on the Object Page. It does not cover create, Discard or resuming a draft.
+- **E2E_A11Y**, at STANDARD rigor, runs only a smoke path: open the list, open an item, edit, save. As the playbook says, axe runs on the start page (List Report) and on one detail page (Object Page); this spec adds the Object Page in edit mode as a Local check (NFR-A11Y-01). It does not cover create, Discard or resuming a draft.
 - **APP_URL_CHECK** covers the 4 CF criteria (AC-06.1 to AC-06.4) and nothing that needs data.
+- **Cross-cutting NFRs.** NFR-A11Y-03, NFR-SEC-04, NFR-LANG-01 and NFR-MAINT-01 are not traced to a single requirement: they apply to the whole app and are checked in the steps that §5 names for each.
 
 **Totals:** 7 requirements (REQ-01 to REQ-07), 6 user stories (US-01 to US-06), 20 acceptance criteria (16 Local, 4 CF), 14 non-functional requirements (PERF 3, A11Y 3, SEC 5, LANG 1, COMP 1, MAINT 1).
 
@@ -290,11 +294,11 @@ The request says only "minimal dummy", so everything below was decided by the au
 
 ## 9. Open points for a person (do not block the spec)
 
-- **C1 · Profile conflict.** Change the configurator profile to "no Work Zone site, project approuter" and "SAP Cloud ALM: No", then apply the new manifest. Until then, LAUNCHPAD_BTP, WORKZONE_SITE_DEV and WORKZONE_CHECK, and the CALM_* steps, are still listed in the playbook. APPROUTER_BTP and APP_URL_CHECK say "with the data of the backend". Here that means: no data on CF (D4), so APP_URL_CHECK checks login, start, 403 without role, a clean console and security headers (AC-06.1 to AC-06.4). There are no write calls on CF, so the CSRF part of APP_URL_CHECK does not apply.
+- **C1 · Profile conflict.** Change the configurator profile to "no Work Zone site, project approuter" and "SAP Cloud ALM: No", then apply the new manifest. Until then, LAUNCHPAD_BTP, WORKZONE_SITE_DEV and WORKZONE_CHECK, and the CALM_* steps, are still listed in the playbook. APPROUTER_BTP and APP_URL_CHECK say "with the data of the backend". **APP_URL_CHECK's own check cannot be met as written:** its check (*"login, app avviata, dati letti con l'utente di test, 403 senza ruolo; console senza errori"*) and its instruction (*"riceve 403 dal servizio"*) assume a data service. Under D4 there is no data to read with the test user, no service to return 403, and the failed service request leaves an error in the console (AC-06.2, C5). This spec checks AC-06.1 to AC-06.4 instead. That is a **deviation to be decided when the APP_URL_CHECK gate is closed**; this spec does not decide it. Under D4 the 403 without role comes from a route scope on the application router, not from a service: AUTH_MATRIX must check that the route scope is defined. There are no write calls on CF, so the CSRF part of APP_URL_CHECK does not apply.
 - **C2 · A3 (resolved).** *History:* C2 asked a person to confirm create and edit on CF with in-memory mock data, or to choose the display-only fallback. A-03 then asked for a change at SPEC_APPROVAL, and the Lead chose option (iii), no data on CF (D4, `docs/handoff.md`). c.ferraro can confirm or change it with `spec-change`.
 - **C3 · Unverified BTP state.** The trust between `dev-emykt6ie` and IAS `aww4s9pgx` is NOT VERIFIED (403, handoff). AC-06.1 and AC-06.3 depend on it, so the request to the BTP administrators must be answered before DEPLOY_PREREQS.
 - **C4 · SAPUI5 line.** The research notes that 1.154 already exists. The profile fixes 1.148, and UI5_VERSION_SELECT confirms it (NFR-MAINT-01).
-- **C5 · What the app shows on CF without a service (D4).** A Fiori elements V4 app builds its pages from the service `$metadata`. With no service on CF, that request is expected to fail. The app could then show an error page instead of the List Report and log an error in the console, which would make AC-06.2 fail. This is expected but **not verified**. SOLUTION_DESIGN must settle it before CF_DEPLOY_DEV, or a person must choose: (a) AC-06.2 accepts the failed service request as expected and checks only that the app's own resources load without errors; (b) SOLUTION_DESIGN finds a way to start the app on CF with no data component; (c) change D4 to option (i) or (ii).
+- **C5 · What the app shows on CF without a service (D4) (settled).** A Fiori elements V4 app builds its pages from the service `$metadata`. With no service on CF, that request fails, and the app may show an error page instead of the List Report. Settled with option (a): on CF the app has no data service, the failed service request is expected and accepted, and AC-06.2 checks that the app's own resources load with HTTP 200 and that the console has no error other than the failed service request. *Optional improvement for SOLUTION_DESIGN:* find a way to start the app on CF with no data service (old option b); if it does, AC-06.2 still holds. Changing D4 to option (i) or (ii) remains possible only through `spec-change`.
 
 ## 10. Process flow
 
