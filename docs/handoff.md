@@ -31,3 +31,27 @@ Target (PLAYBOOK.md, SAP BTP landscape): global account keytobusinesssrl, subacc
 - Steps that ask for `cf login` or the cf CLI are the person's: stop there with a HANDOFF.
 
 BTP_ENVIRONMENT needs cf login / btp login (not signed in here): left to the person, run stopped.
+
+## BTP_ENVIRONMENT · report (local session, 2026-11-19)
+
+Way to read the subaccount, chosen by the developer: **btp CLI** (v2.116.3, user gabriele.rendina@lutech.it) plus the cf CLI already signed in.
+The cf session on this machine is **c.ferraro@key2.it**, not the developer's: used only to read, no change made with it.
+
+What was there (verified):
+- Subaccount dev-emykt6ie (83bccc77-527a-45c4-a09c-f28c31abc152), DEV, eu10, state OK, not used for production.
+- CF org nova-dev-org and space nova-dev-space exist; marketplace of the space offers destination lite, html5-apps-repo app-host/app-runtime.
+- Entitlements assigned to the subaccount: destination lite (1), html5-apps-repo app-host (1) and app-runtime (1), build-workzone-standard foundation (1), SAPLaunchpad free/foundation, application-frontend free (2), identity application (1).
+- Global account trust: sap.default and aww4s9pgx-platform (platform users of the IAS of the landscape).
+- SAP Audit Log not needed: dummy application, no personal data.
+
+Decisions of the developer:
+- Work Zone conflict: **no site, the project's application router** (APPROUTER_BTP). The profile still says Work Zone standard: change it in the configurator and apply the new manifest, so that LAUNCHPAD_BTP / WORKZONE_SITE_DEV / WORKZONE_CHECK drop out.
+- SAP Cloud Logging entitlement: **not assigned** (test development); left as it is.
+- Gate closed with `--force`: TOOLKIT_VERIFY and SKILLS_DISCOVERY are still open in this repository (progress.json of the cloud run was never committed).
+
+What was added: nothing (no change in SAP BTP or Cloud Foundry).
+
+NOT VERIFIED (403 for gabriele.rendina@lutech.it on the subaccount) — open requests to the BTP administrators, before DEPLOY_PREREQS:
+- assign Subaccount Viewer (or Administrator) on dev-emykt6ie to the developer, then re-read: trust with IAS aww4s9pgx in Security › Trust Configuration, subscriptions, role collections;
+- SAP Cloud Logging (cloud-logging, plan dev) not assigned to the subaccount;
+- test and production subaccounts not registered in the landscape: to be asked before UAT_TEST and the release.

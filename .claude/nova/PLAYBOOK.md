@@ -42,13 +42,13 @@ Missing landscapes (test, production, transports) are asked to the developer bef
 
 What the application must do: [REQUEST.md](REQUEST.md).
 
-Playbook: 2/76 steps closed. Next: TOOLKIT_VERIFY · Verifica degli strumenti del piano (gate, skill nova-wolf). Run: node .claude/nova/install.mjs next
+Playbook: 3/76 steps closed, 1 deviation. Next: TOOLKIT_VERIFY · Verifica degli strumenti del piano (gate, skill nova-wolf). Run: node .claude/nova/install.mjs next
 
 ## A · Fondamenta
 
 - [ ] **TOOLKIT_VERIFY** · Verifica degli strumenti del piano · _gate_ · `nova-wolf`
 - [ ] **SKILLS_DISCOVERY** · Skill per le funzioni ancora da coprire · _action_ · `find-skills`
-- [ ] **BTP_ENVIRONMENT** · Ambiente SAP BTP pronto · _gate_ · `mcp-btp-admin`
+- [x] **BTP_ENVIRONMENT** · Ambiente SAP BTP pronto · _gate_ · `mcp-btp-admin` — done 2026-11-19, decided by gabriele@key2.it: btp CLI (gabriele.rendina@lutech.it) + cf (session of c.ferraro@key2.it, read only). Subaccount dev-emykt6ie 83bccc77 eu10 OK; org nova-dev-org/space nova-dev-space exist; entitlements assigned: destination lite, html5-apps-repo app-host+app-runtime, build-workzone-standard foundation, SAPLaunchpad, application-frontend free, identity application. Decision: no Work Zone site, project approuter (profile to change in the configurator); Cloud Logging not assigned by choice (test). Nothing added. NOT VERIFIED (403, missing Subaccount Viewer): subaccount trust with IAS aww4s9pgx, subscriptions, role collections: open request to admins before DEPLOY_PREREQS. Forced: TOOLKIT_VERIFY, SKILLS_DISCOVERY still open. Report in docs/handoff.md (deviation: closed before TOOLKIT_VERIFY, SKILLS_DISCOVERY)
 - [ ] **PROJECT_CONVENTIONS** · Convenzioni del progetto in CLAUDE.md · _action_ · `init`
 - [ ] **BRANCH_AND_PR** · Branch di sviluppo e pull request · _action_ · `cli-git`
 - [ ] **SOURCES_CHECK** · Fonti SAP raggiungibili · _gate_ · `mcp-sap-docs`

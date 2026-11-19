@@ -1,0 +1,13 @@
+{
+  "development": "f17d5823-e2b6-4c9e-b2ee-ef2596feeb61",
+  "steps": {
+    "BTP_ENVIRONMENT": {
+      "status": "DONE",
+      "at": "2026-11-19T16:58:44.666Z",
+      "evidence": "btp CLI (gabriele.rendina@lutech.it) + cf (session of c.ferraro@key2.it, read only). Subaccount dev-emykt6ie 83bccc77 eu10 OK; org nova-dev-org/space nova-dev-space exist; entitlements assigned: destination lite, html5-apps-repo app-host+app-runtime, build-workzone-standard foundation, SAPLaunchpad, application-frontend free, identity application. Decision: no Work Zone site, project approuter (profile to change in the configurator); Cloud Logging not assigned by choice (test). Nothing added. NOT VERIFIED (403, missing Subaccount Viewer): subaccount trust with IAS aww4s9pgx, subscriptions, role collections: open request to admins before DEPLOY_PREREQS. Forced: TOOLKIT_VERIFY, SKILLS_DISCOVERY still open. Report in docs/handoff.md",
+      "tree": "1f23ace55b90204000b81f4d7253aff6e47aecea",
+      "by": "gabriele@key2.it",
+      "deviation": "closed before TOOLKIT_VERIFY, SKILLS_DISCOVERY"
+    }
+  }
+}
