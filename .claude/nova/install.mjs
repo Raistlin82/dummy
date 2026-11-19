@@ -1089,6 +1089,98 @@ async function awaitedChallengers(manifest, root) {
   return awaited
 }
 
+// ---------------------------------------------------------------------------
+// For which way of running a missing entry matters (decisions of the product owner, 18/11/2026; docs/wolf/19, section
+// 36). The configurator says in the manifest the way of the development (development.enginePolicy) and where each step
+// runs (playbook[].engine: CLAUDE_CODE, with a person at the keyboard, or AGENT_SDK, the unattended way: Claude Managed
+// Agents, the runtime of Nova WOLF). A tool of this machine or of the claude.ai account (a plugin, a system tool, an
+// account skill, a copy of the user) matters only where the steps that use it run: missing on a PC whose steps all run
+// the unattended way, it is said as information, never «Blocking». A tool that only one step uses is said as «needed at
+// the step …», not «Blocking»: next says it again when that step starts. A manifest without these fields (a configurator
+// before 18/11/2026) keeps the rule of before.
+// ---------------------------------------------------------------------------
+
+/** The entries that live on a machine or on the claude.ai account, not in the repository. */
+const MACHINE_METHODS = new Set(['PLUGIN', 'SYSTEM_TOOL', 'ACCOUNT'])
+/** The copies of the user, of the organization or of the account that the inventory reports. */
+const MACHINE_SCOPES = new Set(['PERSONAL', 'MANAGED', 'ACCOUNT', 'PLUGIN', 'ENVIRONMENT'])
+/** The tools a step uses, as opposed to the skills of the repository: only those are «needed at the step» when one step uses them. */
+const TOOL_METHODS = new Set(['SYSTEM_TOOL', 'NPM_PACKAGE', 'MCP_SERVER', 'PLUGIN', 'ACCOUNT'])
+const WAY_NAMES = { CLAUDE_CODE: 'Claude Code (a person at the keyboard)', AGENT_SDK: 'the unattended way (Claude Managed Agents, the runtime of Nova WOLF)' }
+
+/**
+ * What `next` adds for a step (docs/wolf/19, section 36): its tools that are missing here (relevanceOf leaves them out of
+ * «Blocking» until their step), and, for a step that reads SAP BTP, the landscape the configurator knows, so that the
+ * step does not go looking for it. Lines, none when there is nothing to say.
+ */
+export async function stepContextLines(manifest, step, root, { inspectOne = inspect } = {}) {
+  const ids = new Set([step.skill, ...(step.fallbacks ?? []).map(f => f.id), ...(step.challengers ?? []).map(c => c.id)].filter(Boolean))
+  const tools = (manifest.items ?? []).filter(entry => ids.has(entry.id) && TOOL_METHODS.has(entry.method))
+  const missing = [], absent = new Set()
+  for (const entry of tools) {
+    const found = await inspectOne(entry, root).catch(() => null)
+    if (found && ['MISSING', 'STALE'].includes(found.status)) { missing.push(`${entry.id} (${found.status}): ${found.detail}`); absent.add(entry.id) }
+  }
+  // the skill of the step missing here with a fallback that is not: the step goes on with the fallback (the btp CLI of
+  // BTP_ENVIRONMENT, first choice that never blocks, decision of the product owner, 18/11/2026); never a download here
+  const backup = absent.has(step.skill) && absent.size === 1 ? (step.fallbacks ?? []).map(f => f.id).find(id => !absent.has(id)) : null
+  const lines = !missing.length ? [] : backup
+    ? [`Tools of this step not ready here: ${missing.join('; ')}. Do not install it from here: do the step with its fallback ` +
+      `${backup}, as the instruction says, and close it with --fallback ${backup}.`]
+    : [`Tools of this step not ready here: ${missing.join('; ')}. Make them ready before the step, or ` +
+      'stop with a handoff that names them.']
+  const btp = [...ids].some(id => BTP_READERS.has(id)) || /^BTP_/.test(step.id ?? '')
+  const landscape = btp ? landscapeMarkdown(manifest) : []
+  if (landscape.length) lines.push('The configurator already knows the SAP BTP landscape of this development: use it, do not ' +
+    'look for another subaccount.', ...landscape.slice(2).filter(Boolean))
+  return lines
+}
+/** The entries that read SAP BTP: the server MCP of its administration and its command line. */
+const BTP_READERS = new Set(['mcp-btp-admin', 'cli-btp'])
+
+/** Where this installer runs: AGENT_SDK in a sandbox of Claude Managed Agents or a session of the runtime, else CLAUDE_CODE. */
+export async function runsHere(root, env = process.env) {
+  return env.NOVA_STEP_SESSION || env.WOLF_CORRELATION_ID || await readSandbox(root) ? 'AGENT_SDK' : 'CLAUDE_CODE'
+}
+
+/** The steps of the playbook that use each entry, as skill, fallback or challenger: Map id → [{ id, engine }]. */
+export function stepsUsing(manifest) {
+  const uses = new Map()
+  for (const step of manifest.playbook ?? []) {
+    if (step.skippedByRigor) continue
+    const ids = [step.skill, ...(step.fallbacks ?? []).map(f => f.id), ...(step.challengers ?? []).map(c => c.id)].filter(Boolean)
+    for (const id of new Set(ids)) uses.set(id, [...uses.get(id) ?? [], { id: step.id, engine: step.engine }])
+  }
+  return uses
+}
+
+/**
+ * Why a missing entry does not block here, or null (pure): { informative: <way> } when it lives on a machine or on the
+ * account and the steps that use it (none: the way of the development) never run where this installer runs; { step } when
+ * it is a tool of one step only. `here` is CLAUDE_CODE or AGENT_SDK (runsHere); `scope` the scope of the copy found.
+ */
+export function relevanceOf(manifest, entry, { here = 'CLAUDE_CODE', scope, uses = stepsUsing(manifest) } = {}) {
+  const steps = uses.get(entry.id) ?? []
+  const policy = manifest.development?.enginePolicy
+  if (MACHINE_METHODS.has(entry.method) || MACHINE_SCOPES.has(scope)) {
+    const ways = steps.length && steps.every(step => step.engine) ? new Set(steps.map(step => step.engine))
+      : policy === 'AGENT_SDK' || policy === 'CLAUDE_CODE' ? new Set([policy]) : null
+    if (ways && !ways.has(here)) return { informative: [...ways][0] }
+  }
+  if (steps.length === 1 && TOOL_METHODS.has(entry.method)) return { step: steps[0].id }
+  return null
+}
+
+/** The results of verify or inventory with what does not block here marked so (relevanceOf): blocking false, and why. */
+export function withRelevance(manifest, results, { here = 'CLAUDE_CODE' } = {}) {
+  const uses = stepsUsing(manifest)
+  return results.map(r => {
+    if (!(r.blocking ?? blocks(r.entry, r.status))) return r
+    const why = relevanceOf(manifest, r.entry, { here, scope: r.scope, uses })
+    return why ? { ...r, blocking: false, relevance: why } : r
+  })
+}
+
 /**
  * Where every entry of the manifest stands in the project. A challenger that a required challenge waits for blocks
  * like a required entry when it is missing, or not the pinned content.
@@ -1111,7 +1203,7 @@ export async function verify(manifest, root) {
       Object.assign(found, { blocking: true, detail: `${found.detail}; the required challenge of ${steps.join(', ')} waits for it` })
     results.push({ entry, ...found })
   }
-  return results
+  return withRelevance(manifest, results, { here: await runsHere(root) })
 }
 
 // ---------------------------------------------------------------------------
@@ -1434,6 +1526,27 @@ export async function repositoryCheck(manifest, root) {
       `open the session in a clone of that repository${ref}` }
 }
 
+/**
+ * What the developer does for btp-administration, in the way of the landscape: SSO, the login in the browser (in a cloud
+ * session the browser comes back to the container: the claude.ai connector instead); DIRECT, BTP_CREDENTIALS (Base64 of
+ * <user>:<password> of the IAS tenant, on one line) in the environment Claude Code starts from, never in the repository.
+ */
+export function btpAdminLine(entry, env = process.env) {
+  const name = entry.mcp?.name ?? 'btp-administration'
+  const cloud = env.CLAUDE_CODE_REMOTE === 'true'
+  if (entry.mcp?.config?.headers) {
+    const tenant = entry.mcp.origin ? ` (IAS tenant ${entry.mcp.origin}; BTP_ORIGIN only to use another one)` : ' (BTP_ORIGIN: the subdomain of the IAS tenant)'
+    return `${name}: Direct Connection, platform users of a custom identity provider${tenant}. Set BTP_CREDENTIALS, the Base64 of ` +
+      '<IAS user>:<password> on one line (base64 -w0 on Linux), in the environment Claude Code starts from, never in the repository' +
+      (cloud ? '; in a cloud session only in an environment of your own: its variables are visible to every user of the environment' : '') +
+      '. It acts with all the rights of that SAP user.'
+  }
+  return cloud
+    ? `${name}: Single Sign-On; its browser login does not complete in a cloud session: connect btp-administration as a connector ` +
+      'of your claude.ai account (https://claude.ai/customize/connectors), or use the fallback of the step.'
+    : `${name}: Single Sign-On; the first time /mcp in Claude Code, then ${name} and the SAP login in the browser. It acts with all the rights of your SAP user.`
+}
+
 export function connection(manifest, env = process.env) {
   const systems = [manifest.development?.system, manifest.development?.change?.origin].filter(Boolean)
   const lines = []
@@ -1453,6 +1566,9 @@ export function connection(manifest, env = process.env) {
           : config.env?.SAP_ALLOWED_PACKAGES && !config.env.SAP_ALLOWED_PACKAGES.includes('${')
             ? `, writes only in ${config.env.SAP_ALLOWED_PACKAGES}` : ''}.`)
     }
+    // btp-administration: how the platform users of the landscape sign in (the configurator decides, docs of SAP read
+    // 19/11/2026): Single Sign-On in the browser, or Direct Connection with the credential of the developer from the environment
+    if (entry.id === 'mcp-btp-admin') lines.push(btpAdminLine(entry, env))
     const unset = neededVariables(config).filter(variable => !env[variable])
     if (!unset.length) continue
     missing.push({ entry, variables: unset })
@@ -1547,6 +1663,7 @@ export function landscapeMarkdown(manifest) {
       s.cfApiUrl ? `Cloud Foundry ${s.cfApiUrl}, org ${s.cfOrg ?? '?'}${s.space ? `, space ${s.space}` : ''}` : null,
       s.kymaApiUrl ? `Kyma ${s.kymaApiUrl}${s.space ? `, namespace ${s.space}` : ''}` : null,
       s.iasTenant ? `IAS ${s.iasTenant}` : null, s.cloudAlmTenant ? `SAP Cloud ALM ${s.cloudAlmTenant}` : null,
+      s.platformLogin === 'DIRECT' ? `btp-administration with Direct Connection (IAS tenant ${s.platformOrigin ?? '?'})` : null,
       s.expiresOn ? expiryText(s.expiresOn) : null]
     return `- **${label}**: ${s.name} (${s.id}): ${parts.filter(Boolean).join('; ')}.`
   }
@@ -1767,7 +1884,7 @@ export async function inventory(manifest, root, { where = claudeHome(), plugins,
   // in a cloud session the team entries come from the claude.ai account of the team (decision of 18/11/2026): reported
   // as account skills, never blocking; on a workstation they are in the clone of the team repository, not reported here
   if (have.cloud) results.push(...await teamStanding(manifest, have))
-  return results
+  return withRelevance(manifest, results, { here: await runsHere(root) })
 }
 
 /** How a cloud session has the team entries: a skill on the claude.ai account, or a command that asks it instead. */
@@ -1806,7 +1923,9 @@ export function inventoryReport(manifest, results, root, { now = new Date(), whe
   return {
     schema: INVENTORY_SCHEMA,
     checkedAt: now.toISOString(),
-    development: manifest.development?.id ? { id: manifest.development.id, title: manifest.development.title } : undefined,
+    // the plan the installation is of: the configurator compares it with the plan of the development (section 36)
+    development: manifest.development?.id ? withoutEmpty({ id: manifest.development.id, title: manifest.development.title,
+      planCalculatedAt: manifest.development.planCalculatedAt }) : undefined,
     catalog: catalog ? { generatedAt: manifest.catalog.generatedAt ?? manifest.generatedAt } : undefined,
     installation: { host: hostname(), cloud: where.cloud, project: basename(resolve(root)) },
     summary: summarize(results, INVENTORY_STATUSES),
@@ -2402,6 +2521,12 @@ export async function apply(manifest, root, { force = false, log = console.log, 
   const untracked = await untrackSessionSkills(root, manifest)
   if (untracked.length) log(`git      ${untracked.join(', ')}: fetched at session start now, taken out of the git index ` +
     '(the files stay on disk); commit the change')
+  // the folders of npm of a plan with packages: out of the index when an earlier commit took them (the files stay)
+  if (manifest.items.some(e => e.method === 'NPM_PACKAGE')) {
+    const modules = await untrackNodeModules(root)
+    if (modules.length) log(`git      ${modules.join(', ')}: npm installs it, it is never committed: taken out of the git ` +
+      'index (the files stay on disk), node_modules/ is in .gitignore; commit the change')
+  }
   // the pinned data of the skills just written (installing a skill replaces its folder): now, and at every session start
   for (const line of await syncSkillData(manifest, root, installed, { origin: dataOrigin })) log(line)
   await writeText(root, FILES.notice, notice(manifest))
@@ -2995,6 +3120,9 @@ async function writeGitignore(root, manifest) {
     // the reports of the checkers, also those of an earlier development kept in the history
     ...(manifest.playbook ?? []).some(s => s.parallel) ? [`/${FILES.checks}/`, `/${HISTORY}/*/checks/`] : [],
     ...manifest.items.some(e => e.method === 'MCP_SERVER') ? [`/${FILES.mcpPending}`] : [],
+    // the packages of the plan go into a package.json the installer writes: what npm install puts beside it is never
+    // committed (decision of the product owner, 18/11/2026: a first run committed node_modules)
+    ...manifest.items.some(e => e.method === 'NPM_PACKAGE') ? [NODE_MODULES] : [],
     // a wave that run-waves started: the pid and the log of its session (docs/10, section 5.5)
     ...manifest.development?.program?.role === 'WAVE' ? [`/${HOME}/session.json`, `/${HOME}/session.log`] : []
   ].sort()
@@ -3030,6 +3158,27 @@ export async function untrackSessionSkills(root, manifest) {
     }
   }
   return done
+}
+
+/** The line of the block of .gitignore that keeps the folders of npm out of git, at any depth. */
+export const NODE_MODULES = 'node_modules/'
+
+/**
+ * The folders node_modules that git tracks in the repository of root, taken out of the index with git rm --cached (the
+ * files stay on disk): when a plan has npm packages, a package.json written by the installer and an npm install before the
+ * .gitignore had the line put them in a commit once. Outside a git repository, or when git cannot tell, nothing.
+ */
+export async function untrackNodeModules(root) {
+  try {
+    const { stdout } = await run('git', ['-C', root, 'ls-files', '--', 'node_modules', '*/node_modules/*'])
+    const folders = [...new Set(stdout.split('\n').filter(Boolean)
+      .map(path => path.slice(0, path.indexOf('node_modules/') + 'node_modules'.length)))].sort()
+    for (const folder of folders) await run('git', ['-C', root, 'rm', '-r', '-q', '--cached', '--', folder])
+    return folders
+  } catch {
+    // not a git repository, or git missing: the line of .gitignore keeps them out from the next commit on
+    return []
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -3724,7 +3873,67 @@ export const notDone = step => {
 export const playbookState = (manifest, progress) =>
   (manifest.playbook ?? []).map(step => ({ step, ...notDone(step), ...progress.steps[step.id] }))
 
-export const nextStep = state => state.find(s => s.status === 'PENDING')
+// ---------------------------------------------------------------------------
+// A step that waits outside the run (docs/wolf/23, decision of the product owner of 19/11/2026): a step the procedure
+// marks `parkable` (the release of a transport, a step of SAP Cloud ALM where the key is not given) may wait for a person
+// (wait) while the steps after it go on, except those that list it in `needs`. It stays PENDING: the next run clears the
+// marks (wait --clear) and tries it again. A step of a person not marked stays a stop, as before.
+// ---------------------------------------------------------------------------
+
+/** Whether an open step is held: it waits outside the run, or it needs a step that is not closed yet. */
+export const heldStep = (s, state) => s.status === 'PENDING' && (Boolean(s.waiting) ||
+  (s.step.needs ?? []).some(id => state.some(o => o.step.id === id && o.status === 'PENDING')))
+
+/** The open steps that wait outside the run, with who for and why: [{ step, for, reason }]. */
+export const waitingSteps = state => state.filter(s => s.status === 'PENDING' && s.waiting)
+  .map(s => ({ step: s.step.id, for: s.waiting.for ?? null, reason: s.waiting.reason ?? null }))
+
+export const nextStep = state => state.find(s => s.status === 'PENDING' && !heldStep(s, state))
+
+/** What next says when no step can run now: every step closed, or what the steps left wait for. */
+export function heldNote(state) {
+  if (!state.some(s => s.status === 'PENDING')) return 'Every step of the playbook is closed.'
+  const waiting = waitingSteps(state)
+  const held = state.filter(s => heldStep(s, state) && !s.waiting).map(s => s.step.id)
+  return `Every step left waits for a person: ${waiting.map(w => `${w.step} (${w.for}: ${w.reason})`).join('; ')}` +
+    (held.length ? `; ${held.join(', ')} wait${held.length === 1 ? 's' : ''} for ${held.length === 1 ? 'it' : 'them'}` : '') +
+    '. Stop here: the run ends, and the configurator puts what waits in «Da decidere».'
+}
+
+/**
+ * Marks a parkable step as waiting for a person (`who`, `reason`), or (`clear`) takes every mark away. Returns the
+ * steps that wait now.
+ */
+export async function waitStep(manifest, root, id, { who, reason, clear = false, now = new Date() } = {}) {
+  const progress = await readProgress(root)
+  if (clear) {
+    for (const key of Object.keys(progress.steps)) if (progress.steps[key]?.waiting) delete progress.steps[key].waiting
+  } else {
+    const step = (manifest.playbook ?? []).find(s => s.id === id)
+    if (!step) throw new Error(`there is no step ${id} in the playbook`)
+    if (!step.parkable) throw new Error(`${id} cannot wait while the others go on: when it needs a person, stop with HANDOFF`)
+    if (['DONE', 'SKIPPED'].includes(progress.steps[id]?.status)) throw new Error(`${id} is closed`)
+    if (!who || !reason) throw new Error(`say who ${id} waits for with --for and what with --reason`)
+    progress.steps[id] = { ...progress.steps[id], waiting: { for: String(who).slice(0, 200), reason: String(reason).slice(0, 500), at: now.toISOString() } }
+  }
+  await writeProgress(root, progress, manifest)
+  await writeText(root, FILES.playbook, playbookMarkdown(manifest, progress))
+  return waitingSteps(playbookState(manifest, progress))
+}
+
+/**
+ * A task for a person that stops nothing (docs/wolf/23): the business tests of a wave, a quality gate. Recorded in
+ * progress.json; the run reports it, and the configurator puts it in «To decide». Returns the task.
+ */
+export async function askPerson(manifest, root, id, { who, what, now = new Date() } = {}) {
+  if (!(manifest.playbook ?? []).some(s => s.id === id)) throw new Error(`there is no step ${id} in the playbook`)
+  if (!who || !what) throw new Error('say who the task is for with --for and what it is with --what')
+  const progress = await readProgress(root)
+  const task = { step: id, for: String(who).slice(0, 200), what: String(what).slice(0, 800), at: now.toISOString() }
+  progress.asks = [...progress.asks ?? [], task]
+  await writeProgress(root, progress, manifest)
+  return task
+}
 
 /**
  * Records when the playbook handed the steps out (ready, next), the first time only: the configurator measures from it
@@ -3751,12 +3960,12 @@ export const LOTS_MAX = 4
  * checker: it comes before the round, alone, one at a time.
  */
 export function readySteps(state, { max = PARALLEL_MAX, progress = { steps: {} } } = {}) {
-  const first = state.findIndex(s => s.status === 'PENDING')
+  const first = state.findIndex(s => s.status === 'PENDING' && !heldStep(s, state))
   if (first < 0) return []
   if (!state[first].step.parallel) return [state[first]]
   const stretch = []
   for (const s of state.slice(first)) {
-    if (s.status !== 'PENDING') continue
+    if (s.status !== 'PENDING' || heldStep(s, state)) continue
     if (!s.step.parallel) break
     stretch.push(s)
   }
@@ -4076,9 +4285,12 @@ export async function closeStep(manifest, root, id, { status = 'DONE', evidence,
   const mandatorySkip = status === 'SKIPPED' && step.mandatory !== false
   if (mandatorySkip && !force) problems.push(`${id} is mandatory: it is skipped only with --force, as a recorded deviation`)
   // a parallel check closes before the other checks of its round: they ran at the same time, on the same tree
+  // a step that waits outside the run, and those that wait for it, hold only the steps that need them (docs/wolf/23)
   const open = state.slice(0, index).filter(s => s.status === 'PENDING' && s.step.mandatory !== false &&
-    !(step.parallel && s.step.parallel)).map(s => s.step.id)
+    !(step.parallel && s.step.parallel) && !(heldStep(s, state) && !(step.needs ?? []).includes(s.step.id))).map(s => s.step.id)
   if (open.length && !force) problems.push(`the mandatory steps before it are still open: ${open.join(', ')}`)
+  const needed = status === 'DONE' ? (step.needs ?? []).filter(need => state.some(s => s.step.id === need && s.status === 'PENDING')) : []
+  if (needed.length && !force && !open.length) problems.push(`${id} needs ${needed.join(', ')} closed first`)
   const required = status === 'DONE' && step.challenge === 'REQUIRED'
   const unchallenged = required ? pendingChallengers(step, progress) : []
   if (unchallenged.length && !force)
@@ -5078,6 +5290,11 @@ export function describeStep(step, progress = { steps: {} }, { fresh = false } =
       'development: the step closes without an independent review. Say so in the report of the step.'] : []),
     ...(step.when ? [`Applies because: ${step.when}`] : []),
     ...noSystemNote(step, progress),
+    // a step that may wait outside the run while the others go on (docs/wolf/23)
+    ...(step.parkable ? [`May wait for a person while the steps after it go on: when only a person can finish it (a release, ` +
+      `a step that needs a key this run does not have), record it with node .claude/nova/install.mjs wait ${step.id} --for "<who>" ` +
+      '--reason "<what is needed>" and go on with next; the next run tries it again.'] : []),
+    ...(step.needs?.length ? [`Needs ${step.needs.join(', ')} closed first: while one of them waits for a person, this step waits too.`] : []),
     // a handover on a specification changed since its approval: it closes after the re-approval
     ...(isHandover(step) && pendingSpecChanges(progress).length ? [specChangesNote(progress)] : []),
     '',
@@ -5824,7 +6041,10 @@ export function summarize(results, statuses = STATUSES) {
   const counts = Object.fromEntries(statuses.map(s => [s, 0]))
   for (const r of results) counts[r.status] = (counts[r.status] ?? 0) + 1
   const blocking = results.filter(r => r.blocking ?? blocks(r.entry, r.status)).map(r => r.entry.id)
-  return { entries: results.length, ...counts, blocking }
+  // what is missing and does not block here: a tool of one step, and what matters only for another way of running
+  const atStep = results.filter(r => r.relevance?.step).map(r => `${r.entry.id} (${r.relevance.step})`)
+  const informative = results.filter(r => r.relevance?.informative).map(r => r.entry.id)
+  return { entries: results.length, ...counts, blocking, ...(atStep.length ? { atStep } : {}), ...(informative.length ? { informative } : {}) }
 }
 
 /**
@@ -5852,6 +6072,11 @@ export function report(manifest, results,
       (manifest.development.functionalOwner ? ` (functional owner: ${manifest.development.functionalOwner})` : ''))
   if (s.blocking.length)
     out.push(`Blocking (required): ${s.blocking.join(', ')}. Run: node .claude/nova/install.mjs ${installation ? 'inventory' : 'verify'}`)
+  if (s.atStep?.length) out.push(`Needed at one step only, not now: ${s.atStep.join(', ')}; next says it again when that step starts.`)
+  const elsewhere = results.filter(r => r.relevance?.informative)
+  for (const way of new Set(elsewhere.map(r => r.relevance.informative)))
+    out.push(`Informative, not needed on this machine: ${elsewhere.filter(r => r.relevance.informative === way).map(r => r.entry.id).join(', ')} ` +
+      `matter only for the steps that run with ${WAY_NAMES[way] ?? way}, which has its own.`)
   for (const f of failures) out.push(`- ${f.entry.id}: ${f.reason}`)
   const attention = results
     .filter(r => r.status !== fine && !(r.status === 'MANUAL' && !r.entry.required))
@@ -5959,6 +6184,11 @@ The playbook, the standard procedure of the development:
                                                   runtime holds (--owner, --holder) is refused; --force takes it
   node install.mjs done    <step> [--evidence <text>] [--by <who>] [--fallback <skill>] [--force]
   node install.mjs skip    <step> --reason <text> [--force]
+  node install.mjs wait    <step> --for <who> --reason <text>   a step that may wait for a person while the steps after
+                                                  it that do not need it go on (a release); wait --clear takes
+                                                  every mark away (a run starts: the steps are tried again)
+  node install.mjs ask     <step> --for <who> --what <text>     a task for a person that stops nothing (business tests,
+                                                  a quality gate): the run reports it to «Da decidere»
   node install.mjs reopen  <step>
   node install.mjs reopen  <step> --amend ...          the same as amend: the step stays closed (a change to documents)
   node install.mjs amend   <step> [--evidence <text>] [--by <who>] [--note <text>] [--volume <MEASURE=VALUE>]...
@@ -6010,8 +6240,8 @@ const FLAGS = new Set(['--force', '--keep-own', '--json', '--help', '--missing',
   '--managed', '--none'])
 const VALUES = new Set(['--manifest', '--project', '--evidence', '--by', '--reason', '--note', '--output', '--fallback', '--skill', '--report',
   '--accepted', '--rejected', '--escalated', '--max', '--only', '--home', '--file', '--since', '--force-only', '--anthropic', '--mcp',
-  '--dir', '--challenger', '--skills', '--owner', '--holder'])
-const STEP_COMMANDS = new Set(['done', 'skip', 'reopen', 'challenge', 'amend'])
+  '--dir', '--challenger', '--skills', '--owner', '--holder', '--for', '--what'])
+const STEP_COMMANDS = new Set(['done', 'skip', 'reopen', 'challenge', 'amend', 'wait', 'ask'])
 
 /** --force for every entry; --force-only <id,id> for those entries only (F8): a Set of ids. */
 export const forceOf = options => options['force-only']
@@ -6022,7 +6252,9 @@ export function parseArguments(argv) {
   const options = { command }
   for (let i = 0; i < rest.length; i++) {
     const argument = rest[i]
-    if (FLAGS.has(argument)) options[argument.slice(2)] = true
+    // wait --clear: every mark of a step that waits goes (a run starts)
+    if (command === 'wait' && argument === '--clear') options.clear = true
+    else if (FLAGS.has(argument)) options[argument.slice(2)] = true
     // --volume MEASURE=VALUE, as many as the step measured
     else if (argument === '--volume') {
       if (rest[i + 1] === undefined) throw new Error('--volume needs MEASURE=VALUE')
@@ -6036,7 +6268,8 @@ export function parseArguments(argv) {
     else if (command === 'spec-change' && options.what === undefined && !argument.startsWith('--')) options.what = argument
     else throw new Error(`unknown argument ${argument}`)
   }
-  if (STEP_COMMANDS.has(command) && !options.step) throw new Error(`${command} needs the step, e.g. ${command} TOOLKIT_VERIFY`)
+  if (STEP_COMMANDS.has(command) && !options.step && !(command === 'wait' && options.clear))
+    throw new Error(`${command} needs the step, e.g. ${command} TOOLKIT_VERIFY`)
   return options
 }
 
@@ -6049,7 +6282,7 @@ export async function main(argv, { log = console.log } = {}) {
   const options = parseArguments(argv)
   if (!options.command || options.help ||
     !['plan', 'apply', 'verify', 'inventory', 'session', 'cloud', 'team', 'catalog', 'status', 'progress', 'next', 'ready', 'done', 'skip', 'no-system', 'root', 'stage',
-      'reopen', 'challenge', 'amend', 'spec-change'].includes(options.command)) {
+      'reopen', 'challenge', 'amend', 'spec-change', 'wait', 'ask'].includes(options.command)) {
     log(USAGE)
     return options.command && !options.help ? 2 : 0
   }
@@ -6134,7 +6367,7 @@ export async function main(argv, { log = console.log } = {}) {
     return 0
   }
   if (options.command === 'stage') return stageCommand(manifest, root, options, log)
-  if (['status', 'next', 'ready', 'done', 'skip', 'reopen', 'challenge', 'amend', 'spec-change'].includes(options.command))
+  if (['status', 'next', 'ready', 'done', 'skip', 'reopen', 'challenge', 'amend', 'spec-change', 'wait', 'ask'].includes(options.command))
     return playbookCommand(manifest, root, options, log)
   if (options.command === 'progress' && options.send) {
     const outcome = await sendProgress(manifest, root)
@@ -6293,8 +6526,22 @@ async function playbookCommand(manifest, root, options, log) {
     .catch(error => log(`Progress not sent to the configurator (${error.message}): it goes with the next command.`))
   // a report still pending: sent again now with a valid login, unless the command sends one anyway; else said loudly.
   // A command that changes a step does it first: nothing about the configurator keeps a step from closing
-  const changes = ['done', 'skip', 'reopen', 'challenge', 'amend', 'spec-change'].includes(options.command)
+  const changes = ['done', 'skip', 'reopen', 'challenge', 'amend', 'spec-change', 'wait', 'ask'].includes(options.command)
   if (!changes) await pendingReport(root, { log, resend: report }).catch(() => {})
+  // a step that waits outside the run, and a task for a person that stops nothing (docs/wolf/23)
+  if (options.command === 'wait') {
+    const waiting = await waitStep(manifest, root, options.step, { who: options.for, reason: options.reason, clear: options.clear })
+    const next = nextStep(playbookState(manifest, await readProgress(root)))
+    log((options.clear ? 'No step waits outside the run now.' : `${options.step} waits for ${options.for}: ${options.reason}.`) +
+      (next ? ` Next: ${next.step.id} · ${next.step.title}.`
+        : waiting.length ? ` Every step left waits for a person: ${waiting.map(w => w.step).join(', ')}.` : ''))
+    return 0
+  }
+  if (options.command === 'ask') {
+    const task = await askPerson(manifest, root, options.step, { who: options.for, what: options.what })
+    log(`Task for ${task.for} recorded on ${task.step}: the run reports it, and it goes to «Da decidere». The step goes on.`)
+    return 0
+  }
   if (options.command === 'done' || options.command === 'skip') {
     const { step, next } = await closeStep(manifest, root, options.step, {
       status: options.command === 'done' ? 'DONE' : 'SKIPPED',
@@ -6449,8 +6696,9 @@ async function playbookCommand(manifest, root, options, log) {
     const sandbox = next ? await readSandbox(root) : null
     const sandboxLines = sandbox ? await sandboxNote(next.step, manifest, sandbox, root) : null
     const stagedLines = staged ? stagedNote(next.step, staged, { sandbox: Boolean(sandbox) }) : []
+    const contextLines = next ? await stepContextLines(manifest, next.step, root) : []
     if (options.json) log(JSON.stringify(next ? { ...next.step, status: next.status, stale, specChanges: pendingSpecChanges(progress), ...(mcpNote ? { mcpPending: mcpNote } : {}),
-      ...(sandboxLines ? { sandbox: sandboxLines } : {}),
+      ...(sandboxLines ? { sandbox: sandboxLines } : {}), ...(contextLines.length ? { context: contextLines } : {}),
       ...(staged ? { staged: staged.error ? { error: staged.error } : { skills: [...staged.staged, ...staged.kept], missing: staged.missing,
         changed: staged.changed, elsewhere: staged.elsewhere, ...(staged.parents ? { parents: staged.parents } : {}) },
         freshContext: stagedLines.at(-1) } : {}) } : null, null, 2))
@@ -6458,16 +6706,19 @@ async function playbookCommand(manifest, root, options, log) {
       (pendingSpecChanges(progress).length ? `${specChangesNote(progress, { full: true })}\n\n` : '') +
       (next ? describeStep(next.step, progress, { fresh: Boolean(staged) && !process.env.NOVA_STEP_SESSION }) + reuseNote(manifest, progress, tree, next.step) +
         (sandboxLines ? `\n\n${sandboxLines.join('\n')}` : '') +
+        (contextLines.length ? `\n\n${contextLines.join('\n')}` : '') +
         (stagedLines.length ? `\n\n${stagedLines.join('\n')}` : '') +
         (autopilot(manifest) ? `\n\n${AUTOPILOT_RULE}` : '')
-        : 'Every step of the playbook is closed.'))
+        : heldNote(state)))
     return 0
   }
   const stale = await staleGates(manifest, progress, root)
   if (options.json) log(JSON.stringify({ summary: playbookSummary(manifest, progress), steps: state.map(s => ({ id: s.step.id, phase: s.step.phase, title: s.step.title, kind: s.step.kind,
     // the agent of the team the step is delegated to (docs/wolf/18): none, the Lead
-    ...(agentOf(s.step) ? { agent: agentOf(s.step) } : {}), ...s, step: undefined })), stale,
-    specChanges: pendingSpecChanges(progress) }, null, 2))
+    ...(agentOf(s.step) ? { agent: agentOf(s.step) } : {}),
+    // a step that may wait outside the run, and those it holds (docs/wolf/23)
+    ...(s.step.parkable ? { parkable: true } : {}), ...(s.step.needs?.length ? { needs: s.step.needs } : {}), ...s, step: undefined })), stale,
+    specChanges: pendingSpecChanges(progress), asks: progress.asks ?? [] }, null, 2))
   else log(playbookSummary(manifest, progress) +
     // the changes themselves, under the line of the summary that counts them
     (pendingSpecChanges(progress).length ? `\n${specChangesNote(progress, { full: true }).split('\n').slice(1).join('\n')}` : '') +

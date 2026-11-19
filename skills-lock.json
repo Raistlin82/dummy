@@ -45,7 +45,7 @@
     },
     "doc-coauthoring": {
       "source": "anthropics/skills",
-      "ref": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "ref": "2c5958ecac7cee2b583967a2c4981d0f4a75c579",
       "sourceType": "github",
       "skillPath": "skills/doc-coauthoring/SKILL.md",
       "computedHash": "b964e4c3ffe13f66f76dd7919073e60c7aec622cd8a8363bb36323188100cf8e"
@@ -213,24 +213,24 @@
     },
     "nova-calm-write": {
       "source": "Raistlin82/nova-app-builder-skill",
-      "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+      "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
       "sourceType": "github",
       "skillPath": "skills/nova-calm-write/SKILL.md",
-      "computedHash": "fbbd8450b390baa0d56ce1430e68f1124ae7f0ca12859d7d9a43e8d5657faea1"
+      "computedHash": "4114132e13746500987caeb0e919686d748c0222b3b37a257eb5df709f2114c7"
     },
     "nova-ips-provisioning": {
       "source": "Raistlin82/nova-app-builder-skill",
-      "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+      "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
       "sourceType": "github",
       "skillPath": "skills/nova-ips-provisioning/SKILL.md",
       "computedHash": "9996b43d61fc2f5dd228f51fa78d3e49dfa4c30a1357272617bc9a10265b776b"
     },
     "nova-wolf": {
       "source": "Raistlin82/nova-app-builder-skill",
-      "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+      "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
       "sourceType": "github",
       "skillPath": "skills/nova-wolf/SKILL.md",
-      "computedHash": "bc4dbd3b1e4939cd16bffdab6d27265bed00b7559c34ef7be3b691db775c1f5d"
+      "computedHash": "1da145740d0438eb8ba05e078f960f38010b7975887da3dbf4fd0588cdd3ed8d"
     },
     "odata-testing": {
       "source": "mrkanitkar/praman-sap-testing",
@@ -311,14 +311,14 @@
     },
     "sap-fiori-app-development": {
       "source": "SAP/open-ux-tools",
-      "ref": "d133fcedd354d1beba63483c764550820d325461",
+      "ref": "facd5f58212dc23d6426179f9495217d35c6bc9d",
       "sourceType": "github",
       "skillPath": "plugins-coding-agents/fiori/skills/sap-fiori-app-development/SKILL.md",
       "computedHash": "80b7a297beb1d3e80a60ebc3f705660e6a8a2e167b9655eb7b2dbad7ea05e67d"
     },
     "sap-fiori-create-cli": {
       "source": "SAP/open-ux-tools",
-      "ref": "d133fcedd354d1beba63483c764550820d325461",
+      "ref": "facd5f58212dc23d6426179f9495217d35c6bc9d",
       "sourceType": "github",
       "skillPath": "plugins-coding-agents/fiori/skills/sap-fiori-create-cli/SKILL.md",
       "computedHash": "f9b51ae3d8082e818f9c20cbf685993e7a67978fa699d4aa32b917c9e6313f11"
@@ -339,7 +339,7 @@
     },
     "sap-fiori-tree-table": {
       "source": "SAP/open-ux-tools",
-      "ref": "d133fcedd354d1beba63483c764550820d325461",
+      "ref": "facd5f58212dc23d6426179f9495217d35c6bc9d",
       "sourceType": "github",
       "skillPath": "plugins-coding-agents/fiori/skills/sap-fiori-tree-table/SKILL.md",
       "computedHash": "dce6ba9a358d56a2a1e7554d44d370ad043f5de032947ccf98e5fc1c6610626b"
@@ -472,7 +472,7 @@
     },
     "webapp-testing": {
       "source": "anthropics/skills",
-      "ref": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "ref": "2c5958ecac7cee2b583967a2c4981d0f4a75c579",
       "sourceType": "github",
       "skillPath": "skills/webapp-testing/SKILL.md",
       "computedHash": "ad5b1fc52807e9afa4635e59218a026b164dc58b6c3f41b0f7c644dcd6ccf572"

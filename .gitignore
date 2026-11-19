@@ -94,5 +94,6 @@
 /.claude/skills/verification
 /.claude/skills/web-perf
 /.claude/skills/webapp-testing
+node_modules/
 # <<< nova skills
 node_modules/

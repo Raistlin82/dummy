@@ -1,6 +1,6 @@
 {
   "schema": "nova-skills-manifest/1",
-  "generatedAt": "2026-11-18T18:20:09.708Z",
+  "generatedAt": "2026-11-19T16:29:44.768Z",
   "development": {
     "id": "f17d5823-e2b6-4c9e-b2ee-ef2596feeb61",
     "title": "Sample",
@@ -57,6 +57,8 @@
         "space": "nova-dev-space",
         "iasTenant": "https://aww4s9pgx.accounts.ondemand.com",
         "cloudAlmTenant": "https://key-to-business-srl-cloudalm.eu20.alm.cloud.sap",
+        "platformLogin": "DIRECT",
+        "platformOrigin": "aww4s9pgx",
         "expiresOn": null
       }
     },
@@ -194,7 +196,7 @@
       "license": "Apache-2.0",
       "source": {
         "repository": "https://github.com/anthropics/skills",
-        "ref": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+        "ref": "2c5958ecac7cee2b583967a2c4981d0f4a75c579",
         "path": "skills/doc-coauthoring"
       },
       "target": ".claude/skills/doc-coauthoring",
@@ -625,11 +627,11 @@
       "categories": ["C02", "C16", "C17", "C18"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "skills/nova-calm-write"
       },
       "target": ".claude/skills/nova-calm-write",
-      "integrity": "fbbd8450b390baa0d56ce1430e68f1124ae7f0ca12859d7d9a43e8d5657faea1",
+      "integrity": "4114132e13746500987caeb0e919686d748c0222b3b37a257eb5df709f2114c7",
       "marketplace": {
         "name": "nova",
         "plugin": "nova-calm-write",
@@ -646,7 +648,7 @@
       "categories": ["C13", "C17"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "skills/nova-ips-provisioning"
       },
       "target": ".claude/skills/nova-ips-provisioning",
@@ -667,11 +669,11 @@
       "categories": ["C00", "C03"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "skills/nova-wolf"
       },
       "target": ".claude/skills/nova-wolf",
-      "integrity": "bc4dbd3b1e4939cd16bffdab6d27265bed00b7559c34ef7be3b691db775c1f5d",
+      "integrity": "1da145740d0438eb8ba05e078f960f38010b7975887da3dbf4fd0588cdd3ed8d",
       "marketplace": {
         "name": "nova",
         "plugin": "nova-wolf",
@@ -826,7 +828,7 @@
       "license": "Apache-2.0",
       "source": {
         "repository": "https://github.com/SAP/open-ux-tools",
-        "ref": "d133fcedd354d1beba63483c764550820d325461",
+        "ref": "facd5f58212dc23d6426179f9495217d35c6bc9d",
         "path": "plugins-coding-agents/fiori/skills/sap-fiori-app-development"
       },
       "target": ".claude/skills/sap-fiori-app-development",
@@ -843,7 +845,7 @@
       "license": "Apache-2.0",
       "source": {
         "repository": "https://github.com/SAP/open-ux-tools",
-        "ref": "d133fcedd354d1beba63483c764550820d325461",
+        "ref": "facd5f58212dc23d6426179f9495217d35c6bc9d",
         "path": "plugins-coding-agents/fiori/skills/sap-fiori-create-cli"
       },
       "target": ".claude/skills/sap-fiori-create-cli",
@@ -878,7 +880,7 @@
       "license": "Apache-2.0",
       "source": {
         "repository": "https://github.com/SAP/open-ux-tools",
-        "ref": "d133fcedd354d1beba63483c764550820d325461",
+        "ref": "facd5f58212dc23d6426179f9495217d35c6bc9d",
         "path": "plugins-coding-agents/fiori/skills/sap-fiori-tree-table"
       },
       "target": ".claude/skills/sap-fiori-tree-table",
@@ -1217,7 +1219,7 @@
       "license": "Apache-2.0",
       "source": {
         "repository": "https://github.com/anthropics/skills",
-        "ref": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+        "ref": "2c5958ecac7cee2b583967a2c4981d0f4a75c579",
         "path": "skills/webapp-testing"
       },
       "target": ".claude/skills/webapp-testing",
@@ -1535,7 +1537,7 @@
       ],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/audit-template/METHOD.md"
       },
       "target": ".claude/audit-template/METHOD.md",
@@ -1551,7 +1553,7 @@
       "categories": ["C02", "C14"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-app-audit.md"
       },
       "target": ".claude/commands/nova-app-audit.md",
@@ -1567,7 +1569,7 @@
       "categories": ["C17"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-audit-all.md"
       },
       "target": ".claude/commands/nova-audit-all.md",
@@ -1591,7 +1593,7 @@
       ],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-audit-profile.md"
       },
       "target": ".claude/commands/nova-audit-profile.md",
@@ -1607,7 +1609,7 @@
       "categories": ["C00"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-context-save.md"
       },
       "target": ".claude/commands/nova-context-save.md",
@@ -1623,7 +1625,7 @@
       "categories": ["C15"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-e2e-create.md"
       },
       "target": ".claude/commands/nova-e2e-create.md",
@@ -1639,7 +1641,7 @@
       "categories": ["C15", "C17"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-e2e-run.md"
       },
       "target": ".claude/commands/nova-e2e-run.md",
@@ -1655,7 +1657,7 @@
       "categories": ["C17"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-sap-audit-full.md"
       },
       "target": ".claude/commands/nova-sap-audit-full.md",
@@ -1671,7 +1673,7 @@
       "categories": ["C13"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-security-matrix.md"
       },
       "target": ".claude/commands/nova-security-matrix.md",
@@ -1687,7 +1689,7 @@
       "categories": ["C18"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-tech-docs.md"
       },
       "target": ".claude/commands/nova-tech-docs.md",
@@ -1703,7 +1705,7 @@
       "categories": ["C14"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-text-polish.md"
       },
       "target": ".claude/commands/nova-text-polish.md",
@@ -1719,7 +1721,7 @@
       "categories": ["C15"],
       "source": {
         "repository": "https://github.com/Raistlin82/nova-app-builder-skill",
-        "ref": "dad6af55fe8c9994bb5e3172c4c9550e37246bb7",
+        "ref": "a18b90b58f2b79b6634c9c3001c658759c05b3ba",
         "path": "commands/nova-ux-quality.md"
       },
       "target": ".claude/commands/nova-ux-quality.md",
@@ -1807,13 +1809,16 @@
         "name": "btp-administration",
         "config": {
           "type": "http",
-          "url": "https://sso.mcp.btp.cloud.sap/mcp",
-          "oauth": {
-            "clientId": "e789ba01-5612-47ee-bfe7-79e26411c1ca"
+          "url": "https://proxy.c-769d49e.kyma.ondemand.com/mcp",
+          "headers": {
+            "Authorization": "Basic ${BTP_CREDENTIALS}",
+            "X-Platform-Origin": "${BTP_ORIGIN:-aww4s9pgx}"
           }
-        }
+        },
+        "platformLogin": "DIRECT",
+        "origin": "aww4s9pgx"
       },
-      "prerequisites": "Server remoto gestito da SAP: nessuna versione da pinnare. In cloud: btp CLI. Al primo uso /mcp, poi btp-administration e il login SAP nel browser; il token dura 30 minuti e si rinnova da solo, dopo un giorno senza uso il login si ripete. Il login SSO vale se l'utente di piattaforma viene dall'identity provider di default (accounts.sap.com). Opera con tutti i diritti del proprio utente SAP, con le autorizzazioni del cockpit: un 403 nomina la role collection che manca. Se l'account trial ha la stessa email di quelli produttivi, vede anche i global account produttivi, quindi per un trial serve un'email distinta. Con un identity provider custom (Direct Connection) l'indirizzo https://proxy.c-769d49e.kyma.ondemand.com/mcp con gli header Authorization: Basic ${BTP_CREDENTIALS} e X-Platform-Origin: ${BTP_ORIGIN}, dalle variabili d'ambiente, mai nel repository: BTP_CREDENTIALS è il Base64 di <utente>:<password> su una riga sola, BTP_ORIGIN il sottodominio del tenant IAS.",
+      "prerequisites": "Server remoto gestito da SAP: nessuna versione da pinnare. Il modo lo sceglie il configuratore sul subaccount del landscape («Accesso a btp-administration»). Single Sign-On (identity provider di default, accounts.sap.com): al primo uso /mcp, btp-administration e il login SAP nel browser; token di 30 minuti rinnovato da solo, dopo un giorno senza uso il login si ripete. Direct Connection (identity provider custom): https://proxy.c-769d49e.kyma.ondemand.com/mcp con gli header Authorization: Basic ${BTP_CREDENTIALS} e X-Platform-Origin: ${BTP_ORIGIN:-<tenant IAS>}, dalle variabili d'ambiente, mai nel repository: BTP_CREDENTIALS è il Base64 di <utente>:<password> del tenant IAS su una riga sola. Opera con tutti i diritti del proprio utente SAP: un 403 nomina la role collection che manca. Per un trial con la stessa email dei global account produttivi serve un'email distinta. Su Claude Managed Agents solo Single Sign-On.",
       "access": {
         "topic": "SAAS_API",
         "path": "DIRECT"
@@ -1890,9 +1895,10 @@
         "config": {
           "type": "http",
           "url": "https://mcp.exa.ai/mcp"
-        }
+        },
+        "credential": "API_KEY"
       },
-      "prerequisites": "Server remoto di Exa (streamable HTTP, https://exa.ai/mcp): funziona anonimo con limiti di uso; per limiti più alti il login OAuth al primo uso. Nessuna chiave nel repository."
+      "prerequisites": "Server remoto di Exa (streamable HTTP, https://exa.ai/mcp): funziona anonimo con limiti di uso; per limiti più alti il login OAuth al primo uso. Nessuna chiave nel repository. Su Claude Managed Agents serve la chiave API di Exa di chi avvia l'esecuzione, con «Collega» nel configuratore: va nel suo vault Claude."
     },
     {
       "id": "mcp-fiori",
@@ -2460,6 +2466,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2489,6 +2496,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2525,6 +2533,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2d167cbbcec4417486d4f3fdfffa58e1.html",
       "when": "Piattaforma: SAP BTP"
     },
@@ -2555,6 +2564,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2586,6 +2596,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2615,6 +2626,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2669,6 +2681,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2706,6 +2719,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/CloudALM/fe419bfabbdc46dfbddbfd78b21483d5/18642f564fcf401f883d12e9ddc0f18d.html",
       "when": "SAP Cloud ALM: Sì"
     },
@@ -2737,6 +2751,7 @@
         "reasoningName": "Alto",
         "effort": "high"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2768,6 +2783,7 @@
         "name": "Independent Verifier",
         "responsibility": "Valida codice, test, ATC, Git, transport ed evidenza in modo indipendente"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2805,6 +2821,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/CloudALM/fe419bfabbdc46dfbddbfd78b21483d5/8049bdba661c4765a970b1465762e8f0.html",
       "when": "SAP Cloud ALM: Sì"
     },
@@ -2860,6 +2877,7 @@
         "reasoningName": "Alto",
         "effort": "high"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2897,6 +2915,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://sap.github.io/btp-solution-diagrams/docs/solution_diagr_intro/intro/",
       "when": "Sempre"
     },
@@ -2929,6 +2948,7 @@
         "name": "SAP Technical Architect Agent",
         "responsibility": "Strategia d'architettura, decisione Clean Core, autorità C2/C3"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -2959,6 +2979,7 @@
         "reasoningName": "Alto",
         "effort": "high"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3015,6 +3036,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://experience.sap.com/fiori-design-web/",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
@@ -3045,6 +3067,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://ui5.sap.com/versionoverview.html",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
@@ -3096,6 +3119,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Modalità: Nuovo sviluppo"
     },
     {
@@ -3148,6 +3172,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3178,6 +3203,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3208,6 +3234,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://ui5.github.io/typescript/",
       "when": "Linguaggio: TypeScript · Interfaccia utente: SAP Fiori elements"
     },
@@ -3252,6 +3279,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/SAP_FIORI_tools/17d50220bcd848aa854c9c182d65b699/41e63bde991a485ea362fc5ba35cf5bc.html",
       "when": "Modalità: Nuovo sviluppo · Stack: Cloud Foundry · Pubblicazione dell'app su SAP BTP: Site di SAP Build Work Zone, standard edition"
     },
@@ -3282,6 +3310,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/01c5f9ba7d6847aaaf069d153b981b51.html",
       "when": "Modalità: Nuovo sviluppo · Stack: Cloud Foundry · Interfaccia utente: SAP Fiori elements · Pubblicazione dell'app su SAP BTP: Site di SAP Build Work Zone, standard edition"
     },
@@ -3314,6 +3343,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/550251abaf49432bbaa65147b65a1f39.html",
       "when": "Piattaforma: SAP BTP"
     },
@@ -3353,6 +3383,7 @@
         "reasoningName": "Alto",
         "effort": "high"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3384,6 +3415,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://cap.cloud.sap/docs/guides/security/authentication",
       "when": "Piattaforma: SAP BTP"
     },
@@ -3414,6 +3446,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/doc/c30747989e33466e8e4f789dd9c3c81c/Cloud/en-US/Provisioning_Service.pdf",
       "when": "Piattaforma: SAP BTP"
     },
@@ -3446,6 +3479,7 @@
         "reasoningName": "Alto",
         "effort": "high"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -3477,6 +3511,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3508,6 +3543,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3540,6 +3576,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3571,6 +3608,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://cap.cloud.sap/docs/guides/uis/i18n",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
@@ -3603,6 +3641,7 @@
         "reasoningName": "Alto",
         "effort": "high"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -3631,6 +3670,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3662,6 +3702,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -3692,6 +3733,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://cap.cloud.sap/docs/guides/deploy/cicd",
       "when": "Stack: Cloud Foundry"
     },
@@ -3729,6 +3771,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2d167cbbcec4417486d4f3fdfffa58e1.html",
       "when": "Stack: Cloud Foundry"
     },
@@ -3760,6 +3803,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://cap.cloud.sap/docs/guides/deploy/to-cf",
       "when": "Stack: Cloud Foundry"
     },
@@ -3789,6 +3833,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://cap.cloud.sap/docs/guides/deploy/to-cf",
       "when": "Stack: Cloud Foundry"
     },
@@ -3825,6 +3870,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2d167cbbcec4417486d4f3fdfffa58e1.html",
       "when": "Stack: Cloud Foundry"
     },
@@ -3856,6 +3902,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://cap.cloud.sap/docs/guides/deploy/health-checks",
       "when": "Stack: Cloud Foundry"
     },
@@ -3886,6 +3933,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/01c5f9ba7d6847aaaf069d153b981b51.html",
       "when": "Modalità: Nuovo sviluppo · Stack: Cloud Foundry · Interfaccia utente: SAP Fiori elements · Pubblicazione dell'app su SAP BTP: Site di SAP Build Work Zone, standard edition"
     },
@@ -3916,6 +3964,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/SAP_FIORI_tools/17d50220bcd848aa854c9c182d65b699/41e63bde991a485ea362fc5ba35cf5bc.html",
       "when": "Modalità: Nuovo sviluppo · Stack: Cloud Foundry · Interfaccia utente: SAP Fiori elements · Pubblicazione dell'app su SAP BTP: Site di SAP Build Work Zone, standard edition"
     },
@@ -3946,6 +3995,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/SAP_FIORI_tools/17d50220bcd848aa854c9c182d65b699/41e63bde991a485ea362fc5ba35cf5bc.html",
       "when": "Modalità: Nuovo sviluppo · Stack: Cloud Foundry · Interfaccia utente: SAP Fiori elements · Pubblicazione dell'app su SAP BTP: Site di SAP Build Work Zone, standard edition"
     },
@@ -3976,6 +4026,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://ui5.sap.com/#/topic/9c6400e",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
@@ -4005,6 +4056,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Stack: Cloud Foundry"
     },
     {
@@ -4034,6 +4086,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://support.sap.com/en/alm/sap-cloud-alm/operations/expert-portal/integration-monitoring/int-mon-content.html",
       "when": "SAP Cloud ALM: Sì · Piattaforma: SAP BTP"
     },
@@ -4066,6 +4119,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -4109,6 +4163,7 @@
         "effort": "medium"
       },
       "decider": "PERSON",
+      "engine": "CLAUDE_CODE",
       "reference": "https://help.sap.com/docs/TRANSPORT_MANAGEMENT_SERVICE/7f7160ec0d8546c6b3eab72fb5ad6fd8/d2005d5d2fc346b98eff7146107243fc.html",
       "when": "Stack: Cloud Foundry · Piattaforma: SAP BTP"
     },
@@ -4146,6 +4201,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/TRANSPORT_MANAGEMENT_SERVICE/7f7160ec0d8546c6b3eab72fb5ad6fd8/d2005d5d2fc346b98eff7146107243fc.html",
       "when": "Stack: Cloud Foundry · Piattaforma: SAP BTP"
     },
@@ -4184,6 +4240,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/doc/92f2c1b209a243639a63769070b0dd58/s4hana_cloud/en-US/6e28a25c7dcd4aa395328b1784736547.pdf",
       "when": "Piattaforma: SAP BTP"
     },
@@ -4222,6 +4279,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/CloudALM/cc59d0e81b41459dacc138c99c0eba76/f5a18b8e81d0492c82eba16fb7dfac62.html",
       "when": "SAP Cloud ALM: Sì · Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
@@ -4255,6 +4313,7 @@
         "effort": "medium"
       },
       "decider": "PERSON",
+      "engine": "CLAUDE_CODE",
       "reference": "https://help.sap.com/docs/TRANSPORT_MANAGEMENT_SERVICE/7f7160ec0d8546c6b3eab72fb5ad6fd8/d2005d5d2fc346b98eff7146107243fc.html",
       "when": "Piattaforma: SAP BTP"
     },
@@ -4286,6 +4345,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/CloudALM/877c96cf971648b09ee0d0a64f7f4fef/6e55eba7e9d04547ad8118b500cee2a2.html",
       "when": "SAP Cloud ALM: Sì · Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
@@ -4325,6 +4385,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/multitarget-application-commands-for-the-cloud-foundry-environment-65ddb1b.md",
       "when": "Stack: Cloud Foundry"
     },
@@ -4352,6 +4413,7 @@
         "effort": "medium"
       },
       "decider": "PERSON",
+      "engine": "CLAUDE_CODE",
       "when": "Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
     {
@@ -4388,6 +4450,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "CLAUDE_CODE",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2d167cbbcec4417486d4f3fdfffa58e1.html",
       "when": "Piattaforma: SAP BTP"
     },
@@ -4431,6 +4494,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "CLAUDE_CODE",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2d167cbbcec4417486d4f3fdfffa58e1.html",
       "when": "Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
@@ -4461,6 +4525,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "CLAUDE_CODE",
       "reference": "https://help.sap.com/docs/TRANSPORT_MANAGEMENT_SERVICE/7f7160ec0d8546c6b3eab72fb5ad6fd8/d2005d5d2fc346b98eff7146107243fc.html",
       "when": "Stack: Cloud Foundry"
     },
@@ -4499,6 +4564,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "CLAUDE_CODE",
       "reference": "https://help.sap.com/doc/92f2c1b209a243639a63769070b0dd58/s4hana_cloud/en-US/6e28a25c7dcd4aa395328b1784736547.pdf",
       "when": "Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
@@ -4536,6 +4602,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "CLAUDE_CODE",
       "reference": "https://help.sap.com/docs/BTP/65de2977205c403bbc107264b8eccf4b/2d167cbbcec4417486d4f3fdfffa58e1.html",
       "when": "Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
@@ -4579,6 +4646,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "CLAUDE_CODE",
       "when": "Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
     {
@@ -4608,6 +4676,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "CLAUDE_CODE",
       "reference": "https://support.sap.com/en/alm/sap-cloud-alm/operations/expert-portal/data-collection-infrastructure.html",
       "when": "SAP Cloud ALM: Sì · Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
@@ -4646,6 +4715,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "CLAUDE_CODE",
       "reference": "https://help.sap.com/docs/CloudALM/877c96cf971648b09ee0d0a64f7f4fef/6e55eba7e9d04547ad8118b500cee2a2.html",
       "when": "SAP Cloud ALM: Sì · Piattaforma: SAP BTP · Consegna dello sviluppo: Progetto del cliente"
     },
@@ -4677,6 +4747,7 @@
         "effort": "medium",
         "session": true
       },
+      "engine": "AGENT_SDK",
       "when": "Modalità: Nuovo sviluppo · Interfaccia utente: SAP Fiori elements"
     },
     {
@@ -4708,6 +4779,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -4740,6 +4812,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -4771,6 +4844,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -4801,6 +4875,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/CloudALM/fe419bfabbdc46dfbddbfd78b21483d5/d38462195c64439188714ef656935630.html",
       "when": "SAP Cloud ALM: Sì"
     },
@@ -4831,6 +4906,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     },
     {
@@ -4862,6 +4938,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://sap.github.io/terraform-exporter-btp/",
       "when": "Stack: Cloud Foundry"
     },
@@ -4889,6 +4966,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements · Piattaforma: SAP BTP"
     },
     {
@@ -4915,6 +4993,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "reference": "https://help.sap.com/docs/SAP_ADD-ON_ASSEMBLY_KIT/9043aa5d2f834ad385e1cdfdadc06b6f/a582f55473568c77e10000000a174cb4.html",
       "when": "Interfaccia utente: SAP Fiori elements · Piattaforma: SAP BTP"
     },
@@ -4942,6 +5021,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements · Piattaforma: SAP BTP"
     },
     {
@@ -4968,6 +5048,7 @@
         "reasoningName": "Medio",
         "effort": "medium"
       },
+      "engine": "AGENT_SDK",
       "when": "Interfaccia utente: SAP Fiori elements · Piattaforma: SAP BTP"
     },
     {
@@ -4999,6 +5080,7 @@
         "name": "Independent Verifier",
         "responsibility": "Valida codice, test, ATC, Git, transport ed evidenza in modo indipendente"
       },
+      "engine": "AGENT_SDK",
       "when": "Sempre"
     }
   ]

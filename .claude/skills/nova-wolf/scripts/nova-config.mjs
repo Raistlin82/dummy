@@ -41,6 +41,9 @@
  *   node nova-config.mjs opportunities <PROGRAM> --decide <decisions.json>  (the decisions of the team on «Nuove
  *                                                                             opportunità», with the credential of the
  *                                                                             decider, docs/wolf/20)
+ *   node nova-config.mjs units <WAVE> --decide <approvals.json>             (the approval of the units of a refactoring
+ *                                                                             wave by the team, CRW_APPROVE, with the
+ *                                                                             credential of the decider, docs/wolf/23)
  *   node nova-config.mjs patterns <PROGRAM|WAVE> [--export <file.json>]      (the correction patterns and their objects)
  *   node nova-config.mjs volumes <PROGRAM|WAVE> [--export <file.json>]       (the volumes with their history)
  *
@@ -95,7 +98,7 @@
  */
 import { spawn, spawnSync } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { appendFile, chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { existsSync, openSync, readFileSync, realpathSync } from 'node:fs'
 import { homedir, hostname, tmpdir } from 'node:os'
 import { dirname, join, relative, resolve, sep } from 'node:path'
@@ -538,6 +541,14 @@ export function configurator({ url, authorization, language = process.env.NOVA_C
         { decisions })
       return JSON.parse(response?.value ?? response)
     },
+    /**
+     * The decisions of the team on the units of a refactoring wave, in bulk (CRW_APPROVE, docs/wolf/23): accepted only
+     * with the credential of the decider; returns { approved, excluded, forPerson, refused }.
+     */
+    approveUnits: async (ID, decisions) => {
+      const response = await request('POST', `/Developments(ID=${ID},IsActiveEntity=true)/ConfigService.approveUnits`, { decisions })
+      return JSON.parse(response?.value ?? response)
+    },
     objectCounters: ID => get(`/Developments(ID=${ID},IsActiveEntity=true)?$select=ID,title,isProgram,isWave,objectsTotal,` +
       'objectsDone,objectsRemaining,objectsToAnalyze,objectsToAdapt,objectsInWave,objectsAdapted,objectsNoChange,objectsExempt,' +
       'objectsRetired,objectsRetiring,objectsDonePercent'),
@@ -681,6 +692,23 @@ export function opportunityDecisions(json) {
     if (typeof row.evidence !== 'string' || !row.evidence.trim()) throw new Error(`${label}: every decision of the team says its evidence`)
   }
   return json.map(row => ({ type: row.type, name: row.name, decision: String(row.decision).toUpperCase(), evidence: row.evidence.trim() }))
+}
+
+/**
+ * The decisions of the team on the units of a refactoring wave (CRW_APPROVE, docs/wolf/23): an array of { unit, objects,
+ * decision: APPROVED | EXCLUDED, effortPd, targetLevel, evidence }, as the architect A-02 writes it in
+ * docs/refactor-approvals.json. Refused here only when it is not one; a unit without its effort or its evidence goes to
+ * the configurator, which leaves it to a person.
+ */
+export function unitDecisions(json) {
+  if (!Array.isArray(json) || !json.length) throw new Error('the decisions are a JSON array of {unit, objects, decision, effortPd, targetLevel, evidence}, not empty')
+  for (const row of json) {
+    const objects = Array.isArray(row?.objects) ? row.objects : String(row?.objects ?? '').split(',').map(o => o.trim()).filter(Boolean)
+    if (!row?.unit || !objects.length) throw new Error(`every decision names its unit and its objects: ${JSON.stringify(row).slice(0, 80)}`)
+    if (!['APPROVED', 'EXCLUDED'].includes(String(row.decision).toUpperCase())) throw new Error(`${row.unit}: the decision is APPROVED or EXCLUDED`)
+  }
+  return json.map(row => ({ unit: row.unit, objects: row.objects, decision: String(row.decision).toUpperCase(), effortPd: row.effortPd ?? null,
+    targetLevel: row.targetLevel ?? null, evidence: typeof row.evidence === 'string' ? row.evidence.trim() : row.evidence ?? null }))
 }
 
 /**
@@ -903,6 +931,17 @@ const USAGE = `NOVA configurator client (NOVA_CONFIG_URL, NOVA_CONFIG_AUTHORIZAT
                                                   configurator records the team as who decided, and leaves to a
                                                   person the exceptions (starts from level D, effort above the
                                                   threshold, sensitive area) and what the team does not decide
+  node nova-config.mjs units <WAVE> --decide <approvals.json>
+                                                  the approval of the units of a refactoring wave by the team
+                                                  (CRW_APPROVE): a JSON array of {unit, objects, decision:
+                                                  APPROVED|EXCLUDED, effortPd, targetLevel, evidence}, written by
+                                                  the architect A-02. Taken only with the credential of the decider,
+                                                  as opportunities; every work item of an approved unit gets the
+                                                  approval of the team (who and when), which counts for its gate;
+                                                  the exceptions (level D without the target level, effort above
+                                                  the threshold, missing data) wait for a person. In a session of
+                                                  the run manager the request goes to the run manager, which sends
+                                                  it with the credential of the decider
   node nova-config.mjs patterns <PROGRAM|WAVE> [--export <file.json>]
                                                   the correction patterns of the batch factory used on the objects
                                                   of a wave, each with the objects it corrected: the data of
@@ -1447,12 +1486,60 @@ async function lessonsCommand(options, log) {
 /** Whether the command line asks for the usage: help, --help or -h, anywhere. */
 export const wantsHelp = argv => argv[0] === 'help' || argv.some(argument => argument === '--help' || argument === '-h')
 
-export async function main(argv, { log = console.log, client = configurator() } = {}) {
+/**
+ * What a session of the run manager asks of the configurator, which it cannot reach (docs/wolf/23): the waves of a plan,
+ * the link to SAP Cloud ALM, rows of the register. The runtime gives the session the file of its run (NOVA_RUN_ACTIONS):
+ * the request goes there as a line of JSON, and the run manager sends it to the configurator after the session, which
+ * does it only on the development of the run. Returns the request, or null for any other command (it runs as always).
+ */
+export async function deferredRequest(options) {
+  const joined = value => Array.isArray(value) ? value.join(', ') : value ?? ''
+  if (options.command === 'waves' && options.id && options.file && !options.dryRun) {
+    const parsed = JSON.parse(await readFile(resolve(options.file), 'utf8'))
+    const waves = Array.isArray(parsed) ? parsed : parsed?.waves
+    if (!Array.isArray(waves) || !waves.length) throw new Error(`${options.file}: no waves (an array, or {"waves": [...]})`)
+    for (const [n, w] of waves.entries())
+      if (!w?.title || (!joined(w.packages) && !joined(w.objects))) throw new Error(`${options.file}: wave ${n + 1} needs a title and packages or objects`)
+    return { action: 'WAVES', id: options.id, waves: waves.map(w => ({ title: w.title, packages: joined(w.packages) || null,
+      objects: joined(w.objects) || null, focus: w.focus ?? null })) }
+  }
+  if (options.command === 'alm' && options.id) {
+    const link = { project: options['calm-project'], task: options.task, feature: options.feature, tenant: options.tenant,
+      requirement: options.requirement, release: options.release }
+    if (!Object.values(link).some(Boolean)) return null
+    return { action: 'ALM', id: options.id, ...Object.fromEntries(Object.entries(link).filter(([, v]) => v)) }
+  }
+  // the approval of the units by the team: the run manager sends it with the credential of the decider, never as the run
+  if (options.command === 'units' && options.id && options.decide) {
+    const decisions = unitDecisions(JSON.parse(await readFile(resolve(options.decide), 'utf8')))
+    return { action: 'UNITS', id: options.id, decisions: JSON.stringify(decisions) }
+  }
+  if (options.command === 'objects' && options.id && options.file && !options.export) {
+    let text = await readFile(resolve(options.file), 'utf8')
+    let parsed = null
+    try { parsed = JSON.parse(text) } catch { /* lines TYPE NAME (PACKAGE): as they are */ }
+    const rows = opportunityRows(parsed)
+    if (rows) text = JSON.stringify(rows)
+    return { action: 'OBJECTS', id: options.id, objects: text, status: options.status ?? null }
+  }
+  return null
+}
+
+export async function main(argv, { log = console.log, client = configurator(), env = process.env } = {}) {
   if (wantsHelp(argv)) {
     log(USAGE)
     return 0
   }
   const options = parseArguments(argv)
+  // a session of the run manager: what it asks of the configurator goes to the run manager (docs/wolf/23)
+  const deferred = env.NOVA_RUN_ACTIONS ? await deferredRequest(options) : null
+  if (deferred) {
+    await mkdir(dirname(env.NOVA_RUN_ACTIONS), { recursive: true })
+    await appendFile(env.NOVA_RUN_ACTIONS, JSON.stringify({ ...deferred, at: new Date().toISOString() }) + '\n')
+    log(`${options.command} ${options.id}: recorded for the run manager, which sends it to the configurator after this session ` +
+      '(a session of a run does not reach the configurator). It is in the log of the run.')
+    return 0
+  }
   switch (options.command) {
     case 'types': {
       const types = await client.types()
@@ -1715,6 +1802,28 @@ export async function main(argv, { log = console.log, client = configurator() } 
       const result = await team.decideOpportunities(options.id, JSON.stringify(decisions))
       log(`Decided by the team: ${result.approved} approved, ${result.rejected} rejected. Left to a person: ${result.forPerson}.`)
       for (const refused of result.refused) log(`  ${refused.object}: ${refused.message}`)
+      return 0
+    }
+    case 'units': {
+      // the approval of the units of a refactoring wave by the team (CRW_APPROVE, docs/wolf/23): A-02 for the team, with
+      // the credential of the decider; the configurator records it on every work item of a unit, and leaves the
+      // exceptions to a person
+      if (!options.id) throw new Error('units needs the wave')
+      if (!options.decide) throw new Error('units needs --decide <approvals.json> (docs/refactor-approvals.json)')
+      let parsed
+      try {
+        parsed = JSON.parse(await readFile(resolve(options.decide), 'utf8'))
+      } catch (error) {
+        throw new Error(`${options.decide} cannot be read as JSON: ${error.message}`, { cause: error })
+      }
+      const decisions = unitDecisions(parsed)
+      const authorization = await deciderAuthorization()
+      if (authorization && !process.env.NOVA_CONFIG_URL)
+        throw new Error('NOVA_CONFIG_URL (the service of the configurator) is required with the client credentials of the decider')
+      const team = authorization ? configurator({ url: process.env.NOVA_CONFIG_URL, authorization }) : client
+      const result = await team.approveUnits(options.id, JSON.stringify(decisions))
+      log(`Units approved by the team: ${result.approved}, excluded: ${result.excluded}. Left to a person: ${result.forPerson}.`)
+      for (const refused of result.refused) log(`  ${refused.unit}: ${refused.message}`)
       return 0
     }
     case 'report':

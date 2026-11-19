@@ -34,7 +34,7 @@ Ask the user every question with the AskUserQuestion tool, with choices: 2 to 4 
 
 ## SAP BTP landscape
 
-- **Development**: SAP BTP sviluppo (subaccount di NOVA) (BTP_DEV): subaccount dev-emykt6ie (ID 83bccc77-527a-45c4-a09c-f28c31abc152); global account keytobusinesssrl; region eu10; Cloud Foundry https://api.cf.eu10-005.hana.ondemand.com, org nova-dev-org, space nova-dev-space; IAS https://aww4s9pgx.accounts.ondemand.com; SAP Cloud ALM https://key-to-business-srl-cloudalm.eu20.alm.cloud.sap.
+- **Development**: SAP BTP sviluppo (subaccount di NOVA) (BTP_DEV): subaccount dev-emykt6ie (ID 83bccc77-527a-45c4-a09c-f28c31abc152); global account keytobusinesssrl; region eu10; Cloud Foundry https://api.cf.eu10-005.hana.ondemand.com, org nova-dev-org, space nova-dev-space; IAS https://aww4s9pgx.accounts.ondemand.com; SAP Cloud ALM https://key-to-business-srl-cloudalm.eu20.alm.cloud.sap; btp-administration with Direct Connection (IAS tenant aww4s9pgx).
 
 Before any check or change in SAP BTP, make sure you are on the development subaccount above: with btp-administration the subaccount 83bccc77-527a-45c4-a09c-f28c31abc152, with the cf CLI `cf login -a https://api.cf.eu10-005.hana.ondemand.com --sso` and `cf target -o "nova-dev-org" -s "nova-dev-space"`. Test and production are only read, and changed by who administers them.
 

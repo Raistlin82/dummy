@@ -2,9 +2,10 @@
   "mcpServers": {
     "btp-administration": {
       "type": "http",
-      "url": "https://sso.mcp.btp.cloud.sap/mcp",
-      "oauth": {
-        "clientId": "e789ba01-5612-47ee-bfe7-79e26411c1ca"
+      "url": "https://proxy.c-769d49e.kyma.ondemand.com/mcp",
+      "headers": {
+        "Authorization": "Basic ${BTP_CREDENTIALS}",
+        "X-Platform-Origin": "${BTP_ORIGIN:-aww4s9pgx}"
       }
     },
     "calm": {
