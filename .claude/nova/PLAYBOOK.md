@@ -42,7 +42,7 @@ Missing landscapes (test, production, transports) are asked to the developer bef
 
 What the application must do: [REQUEST.md](REQUEST.md).
 
-Playbook: 11/76 steps closed, 3 deviations. Next: SPEC_APPROVAL · Approvazione della specifica (approval). Run: node .claude/nova/install.mjs next
+Playbook: 13/76 steps closed, 4 deviations. Next: SOLUTION_DESIGN · Architettura e solution design (action, skill btp-diagram-generator, challenge required). Run: node .claude/nova/install.mjs next
 
 ## A · Fondamenta
 
@@ -57,8 +57,8 @@ Playbook: 11/76 steps closed, 3 deviations. Next: SPEC_APPROVAL · Approvazione 
 
 - [-] **CALM_PROJECT** · Lo sviluppo nel progetto SAP Cloud ALM · _action_ · `nova-calm-write` — skipped 2026-11-19: Decision of c.ferraro@key2.it: no work with SAP Cloud ALM, now or in the future (docs/handoff.md, CLAUDE.md, docs/technical.md) (deviation: mandatory step skipped)
 - [x] **REQUIREMENTS_SPEC** · Specifica dei requisiti · _action_ · `doc-coauthoring` — done 2026-11-19 in 4 min: docs/specification.md: 7 REQ, 6 US with 20 G/W/T criteria (16 Local, 4 CF), 14 NFR; assumptions A1-A10, open points C1-C6; decisions: no backend (person), D4/D5 Lead readings to be confirmed by c.ferraro (C6); amended once, last 2026-11-19: evidence corrected after A-03 review
-- [ ] **SPEC_APPROVAL** · Approvazione della specifica · _approval_ · decided by A-03
-- [ ] **CALM_BACKLOG** · Il backlog nel progetto SAP Cloud ALM · _action_ · `nova-calm-write`
+- [x] **SPEC_APPROVAL** · Approvazione della specifica · _approval_ · decided by A-03 — done 2026-11-19 in 14 min, approved by A-03 Independent Verifier: Approved 2026-11-19 at afe1d42 (fourth review): spec matches the request and the person's verbatim (nessun backend, app minima); 7 REQ, 6 US, 20 AC, 14 NFR traced; open for a person: C6 (confirm D4 before CF_DEPLOY_DEV, D5 before HANDOVER_APPROVAL), C1 profile/APP_URL_CHECK deviation, C3 IAS trust
+- [-] **CALM_BACKLOG** · Il backlog nel progetto SAP Cloud ALM · _action_ · `nova-calm-write` — skipped 2026-11-19: Decision of c.ferraro@key2.it (run c8561bcd): no work with SAP Cloud ALM, now or in the future (docs/handoff.md, CLAUDE.md) (deviation: mandatory step skipped)
 - [ ] **SOLUTION_DESIGN** · Architettura e solution design · _action_ · `btp-diagram-generator` · challenge required
 - [ ] **DIAGRAM_CHECK** · Diagrammi di architettura validati e rivisti · _gate_ · `btp-diagram-generator`
 - [ ] **DESIGN_APPROVAL** · Approvazione dell'architettura · _approval_ · decided by A-02

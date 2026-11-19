@@ -95,7 +95,21 @@
       ]
     },
     "SPEC_APPROVAL": {
-      "started": "2026-11-19T20:42:37.652Z"
+      "status": "DONE",
+      "started": "2026-11-19T20:42:37.652Z",
+      "at": "2026-11-19T20:56:39.196Z",
+      "evidence": "Approved 2026-11-19 at afe1d42 (fourth review): spec matches the request and the person's verbatim (nessun backend, app minima); 7 REQ, 6 US, 20 AC, 14 NFR traced; open for a person: C6 (confirm D4 before CF_DEPLOY_DEV, D5 before HANDOVER_APPROVAL), C1 profile/APP_URL_CHECK deviation, C3 IAS trust",
+      "by": "A-03 Independent Verifier"
+    },
+    "CALM_BACKLOG": {
+      "status": "SKIPPED",
+      "started": "2026-11-19T20:56:39.302Z",
+      "at": "2026-11-19T20:56:42.018Z",
+      "reason": "Decision of c.ferraro@key2.it (run c8561bcd): no work with SAP Cloud ALM, now or in the future (docs/handoff.md, CLAUDE.md)",
+      "deviation": "mandatory step skipped"
+    },
+    "SOLUTION_DESIGN": {
+      "started": "2026-11-19T20:56:42.140Z"
     }
   }
 }
