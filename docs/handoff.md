@@ -22,3 +22,12 @@ Target (PLAYBOOK.md, SAP BTP landscape): global account keytobusinesssrl, subacc
 - This sandbox now has btptf v1.6.0, cf 8.19.0 and the multiapps plugin; html5-plugin for cf is missing (plugins.cloudfoundry.org is not reachable); these tools do not persist to other sessions.
 - sap-dependency-security plugin (`claude plugin install sap-dependency-security@nova-skills --scope project`) is for a person to install.
 - Resume with: node .claude/nova/install.mjs next
+
+## Decision of the person (c.ferraro@key2.it, run 7886edd4-6d98-4a36-a46a-b182f352315d)
+
+- TOOLKIT_VERIFY: exit 0 is enough; step closed (done).
+- Do not install any other binary downloaded from the internet.
+- Push only with `git push origin feature/sample`, alone.
+- Steps that ask for `cf login` or the cf CLI are the person's: stop there with a HANDOFF.
+
+BTP_ENVIRONMENT needs cf login / btp login (not signed in here): left to the person, run stopped.
